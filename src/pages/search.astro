@@ -1,0 +1,287 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+---
+
+<Layout title="Search | inttype" description="게시글 검색">
+  <Header />
+  <main style="max-width:1080px;margin:0 auto;padding:0 1.5rem;">
+
+    <section style="padding:3.5rem 0 2rem;border-bottom:1px solid var(--border);">
+      <h1 style="font-size:1.6rem;font-weight:700;color:var(--fg);margin-bottom:1.25rem;">
+        <span class="nav-kr">검색</span><span class="nav-en">Search</span>
+      </h1>
+
+      <!-- 검색 모드 탭 -->
+      <div class="search-tabs" role="tablist">
+        <button class="search-tab active" data-mode="title" role="tab" aria-selected="true" tabindex="0">
+          <span class="nav-kr">제목</span><span class="nav-en">Title</span>
+        </button>
+        <button class="search-tab" data-mode="tag" role="tab" aria-selected="false" tabindex="-1">
+          <span class="nav-kr">태그</span><span class="nav-en">Tag</span>
+        </button>
+      </div>
+
+      <!-- 검색 입력 -->
+      <div style="position:relative;margin-top:0.75rem;">
+        <input
+          id="search-input"
+          type="search"
+          placeholder=""
+          autocomplete="off"
+          aria-label="검색어 입력"
+          style="width:100%;padding:0.7rem 1rem 0.7rem 2.5rem;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--fg);font-size:0.95rem;font-family:var(--font-sans);outline:none;box-sizing:border-box;transition:border-color 0.15s;"
+        />
+        <svg style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+      </div>
+    </section>
+
+    <section style="padding:1.5rem 0;">
+      <p id="search-count" style="font-size:0.85rem;color:var(--muted);margin-bottom:1.5rem;"></p>
+      <div id="search-loading" style="display:none;padding:3rem 0;color:var(--muted);font-size:0.95rem;">
+        <span class="nav-kr">불러오는 중...</span><span class="nav-en">Loading...</span>
+      </div>
+      <ul id="search-results" style="list-style:none;padding:0;margin:0;"></ul>
+    </section>
+
+  </main>
+</Layout>
+
+<style>
+  .search-tabs {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 0.25rem;
+  }
+  .search-tab {
+    padding: 0.35rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: none;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: var(--font-sans);
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .search-tab:hover { color: var(--fg); }
+  .search-tab.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, var(--card));
+  }
+
+  #search-input:focus { border-color: var(--accent); }
+  #search-input::placeholder { color: var(--muted); }
+
+  .result-item {
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .result-item:last-child { border-bottom: none; }
+  .result-link { text-decoration: none; display: block; }
+  .result-link:hover .result-title { color: var(--accent); }
+  .result-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--fg);
+    margin-bottom: 0.35rem;
+    line-height: 1.5;
+  }
+  .result-title mark {
+    background: color-mix(in srgb, var(--accent) 20%, transparent);
+    color: var(--accent);
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+  .result-desc {
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+  }
+  .result-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .result-category { font-size: 0.75rem; color: var(--accent); font-weight: 500; }
+  .result-date { font-size: 0.75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .result-tag {
+    font-size: 0.75rem;
+    color: var(--muted);
+    padding: 0.1rem 0.45rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+  .result-tag.matched {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+  }
+  .empty-state { padding: 3rem 0; color: var(--muted); font-size: 0.95rem; }
+</style>
+
+<script>
+  interface Post {
+    id: string;
+    title: string;
+    description: string;
+    tags: string[];
+    category: string;
+    pubDate: string;
+  }
+
+  const input = document.getElementById('search-input') as HTMLInputElement;
+  const countEl = document.getElementById('search-count')!;
+  const resultsEl = document.getElementById('search-results')!;
+  const loadingEl = document.getElementById('search-loading')!;
+  const tabs = document.querySelectorAll<HTMLButtonElement>('.search-tab');
+
+  const lang = () => document.documentElement.getAttribute('data-lang') || 'ko';
+  let mode: 'title' | 'tag' = 'title';
+  let posts: Post[] = [];
+
+  function escapeHtml(str: string): string {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function debounce<T extends (...args: unknown[]) => void>(fn: T, delay: number): (...args: Parameters<T>) => void {
+    let timer: ReturnType<typeof setTimeout>;
+    return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); };
+  }
+
+  function activateTab(tab: HTMLButtonElement) {
+    tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); t.tabIndex = -1; });
+    tab.classList.add('active');
+    tab.setAttribute('aria-selected', 'true');
+    tab.tabIndex = 0;
+    tab.focus();
+    mode = tab.dataset.mode as 'title' | 'tag';
+    syncPlaceholder();
+    search(input.value);
+  }
+
+  // 탭 전환 (클릭)
+  tabs.forEach(tab => tab.addEventListener('click', () => activateTab(tab)));
+
+  // 탭 전환 (화살표 키 — ARIA tablist 스펙)
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        activateTab(tabs[(i + 1) % tabs.length]);
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        activateTab(tabs[(i - 1 + tabs.length) % tabs.length]);
+      }
+    });
+  });
+
+  // placeholder 언어 + 모드 동기화
+  const placeholders: Record<string, Record<string, string>> = {
+    title: { ko: '제목으로 검색...', en: 'Search by title...' },
+    tag:   { ko: '태그로 검색...', en: 'Search by tag...' },
+  };
+  function syncPlaceholder() {
+    input.placeholder = placeholders[mode][lang() === 'en' ? 'en' : 'ko'];
+  }
+  syncPlaceholder();
+  new MutationObserver(syncPlaceholder).observe(document.documentElement, { attributes: true, attributeFilter: ['data-lang'] });
+
+  async function loadIndex() {
+    loadingEl.style.display = 'block';
+    try {
+      const res = await fetch('/search-index.json');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      posts = await res.json();
+      const q = new URLSearchParams(location.search).get('q') ?? '';
+      const m = new URLSearchParams(location.search).get('mode');
+      if (m === 'tag') {
+        tabs.forEach(t => {
+          const isTag = t.dataset.mode === 'tag';
+          t.classList.toggle('active', isTag);
+          t.setAttribute('aria-selected', String(isTag));
+          t.tabIndex = isTag ? 0 : -1;
+        });
+        mode = 'tag';
+        syncPlaceholder();
+      }
+      if (q) { input.value = q; search(q); }
+      else renderCount(posts.length, '');
+    } catch {
+      countEl.textContent = lang() === 'en' ? 'Failed to load search index.' : '검색 데이터를 불러오지 못했습니다.';
+    } finally {
+      loadingEl.style.display = 'none';
+    }
+  }
+
+  function highlight(text: string, q: string): string {
+    if (!q) return escapeHtml(text);
+    const safeText = escapeHtml(text);
+    const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return safeText.replace(new RegExp(escapeHtml(escaped), 'gi'), m => `<mark>${m}</mark>`);
+  }
+
+  function renderCount(total: number, q: string) {
+    if (!q) {
+      countEl.textContent = lang() === 'en' ? `${total} posts total` : `전체 ${total}개의 글`;
+    } else {
+      countEl.textContent = lang() === 'en' ? `${total} result${total !== 1 ? 's' : ''}` : `${total}개의 결과`;
+    }
+  }
+
+  function search(query: string) {
+    const q = query.trim().toLowerCase();
+
+    const filtered = q
+      ? posts.filter(p => {
+          if (mode === 'title') return p.title.toLowerCase().includes(q);
+          if (mode === 'tag')   return p.tags.some(t => t.toLowerCase().includes(q));
+          return false;
+        })
+      : posts;
+
+    // URL 업데이트
+    const url = new URL(location.href);
+    q ? url.searchParams.set('q', q) : url.searchParams.delete('q');
+    mode === 'tag' ? url.searchParams.set('mode', 'tag') : url.searchParams.delete('mode');
+    history.replaceState(null, '', url);
+
+    renderCount(filtered.length, q);
+
+    if (filtered.length === 0) {
+      resultsEl.innerHTML = `<li class="empty-state">${lang() === 'en' ? 'No results found.' : '검색 결과가 없습니다.'}</li>`;
+      return;
+    }
+
+    resultsEl.innerHTML = filtered.map(post => {
+      const tags = post.tags.map(t => {
+        const isMatch = mode === 'tag' && q && t.toLowerCase().includes(q);
+        return `<span class="result-tag${isMatch ? ' matched' : ''}">#${isMatch ? highlight(t, q) : escapeHtml(t)}</span>`;
+      }).join('');
+
+      return `
+        <li class="result-item">
+          <a href="/posts/${escapeHtml(post.id)}" class="result-link">
+            <p class="result-title">${mode === 'title' ? highlight(post.title, q) : escapeHtml(post.title)}</p>
+            ${post.description ? `<p class="result-desc">${escapeHtml(post.description)}</p>` : ''}
+            <div class="result-meta">
+              <span class="result-category">${escapeHtml(post.category)}</span>
+              <span class="result-date">${escapeHtml(post.pubDate)}</span>
+              ${tags}
+            </div>
+          </a>
+        </li>
+      `;
+    }).join('');
+  }
+
+  input.addEventListener('input', debounce(() => search(input.value), 200));
+
+  loadIndex();
+</script>

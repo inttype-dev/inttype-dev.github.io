@@ -1,0 +1,93 @@
+---
+import { getCollection, render } from 'astro:content';
+import PostLayout from '@/layouts/PostLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts', ({ data }) => !data.draft && data.lang !== 'en');
+  return posts.map(post => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+
+const allPosts = await getCollection('posts');
+const enPost = allPosts.find(p => p.data.translationOf === post.id && p.data.lang === 'en');
+const enRendered = enPost ? await render(enPost) : null;
+
+// 이전글 / 다음글
+const projectSlug = post.data.project ?? null;
+
+type PostRefJSON = { id: string; title: string; dateKr: string; dateEn: string } | null;
+const toRef = (p: (typeof allPosts)[0]) => ({
+  id: p.id,
+  title: p.data.title,
+  dateKr: p.data.pubDate.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }),
+  dateEn: p.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+});
+
+let prevPost: { id: string; title: string; pubDate: Date } | null = null;
+let nextPost: { id: string; title: string; pubDate: Date } | null = null;
+let navMapJson = '';
+
+if (projectSlug) {
+  // 프로젝트 글 → 프로젝트 내 이전/다음
+  const pool = allPosts
+    .filter(p => !p.data.draft && p.data.lang !== 'en' && p.data.project === projectSlug)
+    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+  const i = pool.findIndex(p => p.id === post.id);
+  prevPost = i < pool.length - 1 ? { id: pool[i+1].id, title: pool[i+1].data.title, pubDate: pool[i+1].data.pubDate } : null;
+  nextPost = i > 0 ? { id: pool[i-1].id, title: pool[i-1].data.title, pubDate: pool[i-1].data.pubDate } : null;
+} else {
+  // 일반 글 → 카테고리별 navMap 빌드
+  const base = allPosts
+    .filter(p => !p.data.draft && p.data.lang !== 'en' && !p.data.project)
+    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+  const navMap: Record<string, { prev: PostRefJSON; next: PostRefJSON }> = {};
+  for (const cat of ['전체', '개발', '일상']) {
+    const pool = cat === '전체' ? base : base.filter(p => p.data.category === cat);
+    const i = pool.findIndex(p => p.id === post.id);
+    navMap[cat] = {
+      prev: i >= 0 && i < pool.length - 1 ? toRef(pool[i + 1]) : null,
+      next: i > 0 ? toRef(pool[i - 1]) : null,
+    };
+  }
+  navMapJson = JSON.stringify(navMap);
+
+  // 기본(전체) 값으로 초기 렌더용 props 설정
+  const def = navMap['전체'];
+  const prevFromPool = def.prev ? base.find(p => p.id === def.prev!.id) ?? null : null;
+  const nextFromPool = def.next ? base.find(p => p.id === def.next!.id) ?? null : null;
+  prevPost = prevFromPool ? { id: prevFromPool.id, title: prevFromPool.data.title, pubDate: prevFromPool.data.pubDate } : null;
+  nextPost = nextFromPool ? { id: nextFromPool.id, title: nextFromPool.data.title, pubDate: nextFromPool.data.pubDate } : null;
+}
+
+function calcReadingTime(body: string): number {
+  const words = body.trim().split(/\s+/).length;
+  return Math.max(1, Math.round(words / 200));
+}
+---
+
+<PostLayout
+  title={post.data.title}
+  description={post.data.description}
+  pubDate={post.data.pubDate}
+  tags={post.data.tags}
+  headings={headings}
+  hasEnTranslation={!!enRendered}
+  enTitle={enPost?.data.title}
+  enDescription={enPost?.data.description}
+  enTags={enPost?.data.tags}
+  readingTime={calcReadingTime(post.body ?? '')}
+  postId={post.id}
+  prevPost={prevPost}
+  nextPost={nextPost}
+  projectSlug={projectSlug}
+  navMapJson={navMapJson || undefined}
+>
+  <Content />
+  {enRendered && <enRendered.Content slot="en" />}
+</PostLayout>

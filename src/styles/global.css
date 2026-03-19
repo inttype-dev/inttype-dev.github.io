@@ -1,0 +1,68 @@
+/* Pretendard */
+@font-face { font-family: 'Pretendard'; font-weight: 400; font-display: swap; src: url('/fonts/woff2/Pretendard-Regular.woff2') format('woff2'); }
+@font-face { font-family: 'Pretendard'; font-weight: 500; font-display: swap; src: url('/fonts/woff2/Pretendard-Medium.woff2') format('woff2'); }
+@font-face { font-family: 'Pretendard'; font-weight: 600; font-display: swap; src: url('/fonts/woff2/Pretendard-SemiBold.woff2') format('woff2'); }
+@font-face { font-family: 'Pretendard'; font-weight: 700; font-display: swap; src: url('/fonts/woff2/Pretendard-Bold.woff2') format('woff2'); }
+
+/* Geist */
+@font-face { font-family: 'Geist'; font-weight: 400; font-display: swap; src: url('/fonts/webfonts/Geist-Regular.woff2') format('woff2'); }
+@font-face { font-family: 'Geist'; font-weight: 500; font-display: swap; src: url('/fonts/webfonts/Geist-Medium.woff2') format('woff2'); }
+@font-face { font-family: 'Geist'; font-weight: 600; font-display: swap; src: url('/fonts/webfonts/Geist-SemiBold.woff2') format('woff2'); }
+@font-face { font-family: 'Geist'; font-weight: 700; font-display: swap; src: url('/fonts/webfonts/Geist-Bold.woff2') format('woff2'); }
+@import "tailwindcss";
+
+:root {
+  --font-sans: 'Geist', 'Pretendard', system-ui, sans-serif;
+  --bg: #ffffff;
+  --fg: #111111;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --accent: #2563eb;
+  --card: #f9fafb;
+}
+
+[data-theme="dark"] {
+  --bg: #0f0f0f;
+  --fg: #f1f1f1;
+  --muted: #9ca3af;
+  --border: #1f1f1f;
+  --accent: #60a5fa;
+  --card: #161616;
+}
+
+html {
+  font-family: var(--font-sans);
+  background-color: var(--bg);
+  color: var(--fg);
+  transition: background-color 0.2s, color 0.2s;
+  scrollbar-gutter: stable;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.page-content {
+  flex: 1;
+}
+
+/* 포커스 스타일 */
+*:focus { outline: none; }
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* 언어 토글 — nav 인라인 spans */
+.nav-en { display: none; }
+html[data-lang="en"] .nav-kr { display: none; }
+html[data-lang="en"] .nav-en { display: inline; }
+
+/* 언어 토글 — 콘텐츠 블록 */
+.lang-en { display: none; }
+html[data-lang="en"] .lang-kr { display: none; }
+html[data-lang="en"] .lang-en { display: revert; }

@@ -1,0 +1,430 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+
+const allPosts = (await getCollection('posts', ({ data }) => !data.draft && data.lang !== 'en'))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const categories = ['전체', '개발', '프로젝트', '일상'];
+const categoryEn: Record<string, string> = {
+  '전체': 'All',
+  '개발': 'Dev',
+  '프로젝트': 'Projects',
+  '일상': 'Daily',
+};
+const allTags = [...new Set(allPosts.flatMap(p => p.data.tags))].sort();
+
+const categoryCounts = categories.slice(1).reduce((acc, cat) => {
+  if (cat === '프로젝트') {
+    acc[cat] = allPosts.filter(p => !!p.data.project).length;
+  } else {
+    acc[cat] = allPosts.filter(p => p.data.category === cat && !p.data.project).length;
+  }
+  return acc;
+}, {} as Record<string, number>);
+---
+
+<Layout title="Posts | inttype">
+  <Header />
+  <div class="page-wrapper">
+
+    <!-- 사이드바 -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <p class="sidebar-label"><span class="nav-kr">카테고리</span><span class="nav-en">Category</span></p>
+        <ul class="sidebar-list">
+          <li>
+            <button class="filter-btn active" data-type="category" data-value="전체">
+              <span><span class="nav-kr">전체</span><span class="nav-en">All</span></span>
+              <span class="count">{allPosts.length}</span>
+            </button>
+          </li>
+          {categories.slice(1).map(cat => (
+            <li>
+              <button class="filter-btn" data-type="category" data-value={cat}>
+                <span><span class="nav-kr">{cat}</span><span class="nav-en">{categoryEn[cat]}</span></span>
+                <span class="count">{categoryCounts[cat] ?? 0}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="sidebar-section">
+        <p class="sidebar-label"><span class="nav-kr">태그</span><span class="nav-en">Tags</span></p>
+        <div class="tag-cloud">
+          {allTags.map((tag, i) => (
+            <button
+              class={`tag-pill${i >= 8 ? ' tag-hidden' : ''}`}
+              data-type="tag"
+              data-value={tag}
+            >
+              #{tag}
+            </button>
+          ))}
+        </div>
+        {allTags.length > 8 && (
+          <a href="/tags" class="tag-more-btn">
+            <span class="nav-kr">+{allTags.length - 8}개 더보기 →</span><span class="nav-en">+{allTags.length - 8} more →</span>
+          </a>
+        )}
+      </div>
+    </aside>
+
+    <!-- 포스트 목록 -->
+    <main class="post-area">
+      <div class="post-header">
+        <h1 class="post-title"><span class="nav-kr">게시글</span><span class="nav-en">Posts</span></h1>
+        <p class="post-count" id="post-count"><span class="nav-kr">총 {allPosts.length}개의 글</span><span class="nav-en">{allPosts.length} posts</span></p>
+      </div>
+
+      <ul id="post-list">
+        {allPosts.map(post => (
+          <li
+            data-category={post.data.project ? '프로젝트' : post.data.category}
+            data-tags={post.data.tags.join(',')}
+          >
+            <div class="post-meta-top">
+              <span class="post-category">{post.data.project ? '프로젝트' : post.data.category}</span>
+              <span class="post-date">
+                <span class="nav-kr">{post.data.pubDate.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span><span class="nav-en">{post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+              </span>
+            </div>
+            <a href={`/posts/${post.id}`} class="post-link" data-base={`/posts/${post.id}`}>
+              <h2 class="post-title-item">{post.data.title}</h2>
+              {post.data.description && (
+                <p class="post-desc">{post.data.description}</p>
+              )}
+            </a>
+            <div class="post-tags">
+              {post.data.tags.map(tag => (
+                <span class="post-tag">#{tag}</span>
+              ))}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </main>
+
+  </div>
+</Layout>
+
+<style>
+  .page-wrapper {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  /* 사이드바 */
+  .sidebar {
+    position: sticky;
+    top: 5rem;
+    padding-top: 3.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  .sidebar-section {}
+  .sidebar-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.6rem;
+  }
+  .sidebar-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+  .filter-btn {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    border: none;
+    background: none;
+    font-size: 0.875rem;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: var(--font-sans);
+    transition: all 0.15s;
+    text-align: left;
+  }
+  .filter-btn:hover {
+    background: var(--card);
+    color: var(--fg);
+  }
+  .filter-btn.active {
+    background: var(--card);
+    color: var(--fg);
+    font-weight: 600;
+  }
+  .count {
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .tag-pill {
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: none;
+    font-size: 0.75rem;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: var(--font-sans);
+    transition: all 0.15s;
+  }
+  .tag-hidden {
+    display: none;
+  }
+  .tag-more-btn {
+    display: block;
+    margin-top: 0.5rem;
+    background: none;
+    border: none;
+    font-size: 0.75rem;
+    color: var(--accent);
+    cursor: pointer;
+    font-family: var(--font-sans);
+    padding: 0;
+  }
+  .tag-more-btn:hover {
+    text-decoration: underline;
+  }
+  .tag-pill:hover,
+  .tag-pill.active {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* 포스트 목록 */
+  .post-area {
+    min-width: 0;
+  }
+  .post-header {
+    padding: 3.5rem 0 2rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0;
+  }
+  .post-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--fg);
+    margin-bottom: 0.3rem;
+  }
+  .post-count {
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+  #post-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  #post-list > li {
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  #post-list > li[style*="display: none"] { display: none !important; }
+  .post-meta-top {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  .post-category {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .post-date {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .post-link {
+    text-decoration: none;
+    display: block;
+  }
+  .post-link:hover .post-title-item { color: var(--accent); }
+  .post-title-item {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--fg);
+    margin-bottom: 0.4rem;
+    line-height: 1.5;
+  }
+  .post-desc {
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 0.75rem;
+  }
+  .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .post-tag {
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  /* 모바일 */
+  @media (max-width: 640px) {
+    .page-wrapper {
+      grid-template-columns: 1fr;
+    }
+    .sidebar {
+      position: static;
+      padding-top: 2rem;
+      padding-bottom: 1.5rem;
+      gap: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* 카테고리: 가로 스크롤 칩 */
+    .sidebar-list {
+      flex-direction: row;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      gap: 0.4rem;
+      padding-bottom: 0.25rem;
+      scrollbar-width: none;
+    }
+    .sidebar-list::-webkit-scrollbar { display: none; }
+
+    .filter-btn {
+      width: auto;
+      white-space: nowrap;
+      padding: 0.45rem 0.85rem;
+      min-height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      justify-content: center;
+    }
+    .filter-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 8%, var(--card));
+    }
+    .count { display: none; }
+
+    /* 태그: 가로 wrap */
+    .tag-pill {
+      padding: 0.45rem 0.85rem;
+      min-height: 36px;
+    }
+  }
+</style>
+
+<script>
+  const filterBtns = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
+  const tagPills = document.querySelectorAll<HTMLButtonElement>('.tag-pill');
+  const items = document.querySelectorAll<HTMLLIElement>('#post-list > li');
+  const countEl = document.getElementById('post-count')!;
+
+  let activeCategory = '전체';
+  let activeTag = '';
+
+  function applyFilter() {
+    let visible = 0;
+    items.forEach(item => {
+      const cat = item.dataset.category ?? '';
+      const tags = item.dataset.tags?.split(',') ?? [];
+      const catMatch = activeCategory === '전체' || cat === activeCategory;
+      const tagMatch = activeTag === '' || tags.includes(activeTag);
+      const show = catMatch && tagMatch;
+      item.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    const krEl = countEl.querySelector<HTMLElement>('.nav-kr');
+    const enEl = countEl.querySelector<HTMLElement>('.nav-en');
+    if (krEl) krEl.textContent = `총 ${visible}개의 글`;
+    if (enEl) enEl.textContent = `${visible} posts`;
+
+    // 포스트 링크에 현재 필터 컨텍스트 추가
+    document.querySelectorAll<HTMLAnchorElement>('.post-link[data-base]').forEach(link => {
+      const base = link.dataset.base!;
+      if (activeCategory !== '전체') {
+        link.href = `${base}?cat=${encodeURIComponent(activeCategory)}`;
+      } else if (activeTag) {
+        link.href = `${base}?tag=${encodeURIComponent(activeTag)}`;
+      } else {
+        link.href = base;
+      }
+    });
+  }
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeCategory = btn.dataset.value!;
+      // 태그 선택 해제
+      activeTag = '';
+      tagPills.forEach(p => p.classList.remove('active'));
+      applyFilter();
+    });
+  });
+
+  tagPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      const val = pill.dataset.value!;
+      if (activeTag === val) {
+        activeTag = '';
+        pill.classList.remove('active');
+      } else {
+        tagPills.forEach(p => p.classList.remove('active'));
+        activeTag = val;
+        pill.classList.add('active');
+      }
+      applyFilter();
+    });
+  });
+
+  // URL ?cat= 파라미터로 초기 카테고리 필터 적용
+  const urlCat = new URLSearchParams(location.search).get('cat');
+  if (urlCat) {
+    const match = [...filterBtns].find(b => b.dataset.value === urlCat);
+    if (match) {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      match.classList.add('active');
+      activeCategory = urlCat;
+      applyFilter();
+    }
+  }
+
+  // URL ?tag= 파라미터로 초기 필터 적용
+  const urlTag = new URLSearchParams(location.search).get('tag');
+  if (urlTag) {
+    const match = [...tagPills].find(p => p.dataset.value === urlTag);
+    if (match) {
+      // 숨겨진 태그라면 노출시키기
+      match.classList.remove('tag-hidden');
+      match.classList.add('active');
+      activeTag = urlTag;
+      applyFilter();
+      match.scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+</script>

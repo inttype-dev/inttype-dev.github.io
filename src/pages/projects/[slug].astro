@@ -1,0 +1,211 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+import { formatDate } from '@/utils/date';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects', ({ data }) => data.lang !== 'en');
+  return projects.map(p => ({ params: { slug: p.id }, props: { project: p } }));
+}
+
+const { project } = Astro.props;
+const { data } = project;
+
+const relatedPosts = (await getCollection('posts', ({ data: d }) => !d.draft && d.project === project.id))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const projectSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: data.name,
+  description: data.desc,
+  keywords: data.tags.join(', '),
+  author: { '@type': 'Person', name: 'inttype', url: 'https://inttype-dev.github.io/about' },
+  ...(data.github ? { codeRepository: data.github } : {}),
+  ...(data.link ? { url: data.link } : {}),
+};
+---
+
+<Layout title={`${data.name} | inttype`} jsonLd={projectSchema}>
+  <Header />
+  <main style="max-width: 1080px; margin: 0 auto; padding: 0 1.5rem;">
+
+    <!-- 프로젝트 헤더 -->
+    <section style="padding: 3.5rem 0 2rem; border-bottom: 1px solid var(--border);">
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+        <a href="/projects" style="font-size: 0.85rem; color: var(--muted); text-decoration: none;"><span class="nav-kr">프로젝트</span><span class="nav-en">Projects</span></a>
+        <span style="color: var(--border);">/</span>
+        <span style="font-size: 0.85rem; color: var(--fg);">{data.name}</span>
+      </div>
+      <div class="proj-header-row">
+        <h1 style="font-size: 1.6rem; font-weight: 700; color: var(--fg); line-height: 1.3;">{data.name}</h1>
+        <span class={`status-badge ${data.status === '진행 중' ? 'ongoing' : ''}`}>
+          <span class="nav-kr">{data.status}</span>
+          <span class="nav-en">{data.status === '진행 중' ? 'In Progress' : 'Completed'}</span>
+        </span>
+      </div>
+      <p style="font-size: 0.95rem; color: var(--muted); line-height: 1.7; margin: 0.75rem 0 1.25rem;">{data.desc}</p>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.25rem;">
+        {data.tags.map(tag => (
+          <span style="font-size: 0.78rem; color: var(--muted); border: 1px solid var(--border); border-radius: 4px; padding: 0.15rem 0.5rem;">{tag}</span>
+        ))}
+      </div>
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <span style="font-size: 0.85rem; color: var(--muted);">{formatDate(data.date)}</span>
+        {data.github && (
+          <a href={data.github} target="_blank" rel="noopener noreferrer"
+            style="font-size: 0.85rem; color: var(--accent); text-decoration: none;">
+            GitHub →
+          </a>
+        )}
+        {data.link && (
+          <a href={data.link} target="_blank" rel="noopener noreferrer"
+            style="font-size: 0.85rem; color: var(--accent); text-decoration: none;">
+            <span class="nav-kr">사이트 →</span><span class="nav-en">Live →</span>
+          </a>
+        )}
+      </div>
+    </section>
+
+    <!-- 목록으로 -->
+    <div style="padding: 1.5rem 0 0;">
+      <a href="/projects" class="back-block">
+        <span class="nav-kr">← 프로젝트 목록</span>
+        <span class="nav-en">← All Projects</span>
+      </a>
+    </div>
+
+    <!-- 관련 글 -->
+    <section style="padding: 2.5rem 0;">
+      <h2 style="font-size: 0.95rem; font-weight: 600; color: var(--fg); margin-bottom: 1.25rem;">
+        <span class="nav-kr">관련 글{relatedPosts.length > 0 ? ` (${relatedPosts.length})` : ''}</span>
+        <span class="nav-en">Related Posts{relatedPosts.length > 0 ? ` (${relatedPosts.length})` : ''}</span>
+      </h2>
+      {relatedPosts.length > 0 ? (
+        <ul style="list-style: none; padding: 0; margin: 0;">
+          {relatedPosts.map(post => (
+            <li class="post-item">
+              <div class="post-meta-top">
+                <span class="post-category">{post.data.category}</span>
+                <span class="post-date">
+                  <span class="nav-kr">{post.data.pubDate.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                  <span class="nav-en">{post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                </span>
+              </div>
+              <a href={`/posts/${post.id}`} class="post-link">
+                <h3 class="post-title">{post.data.title}</h3>
+                {post.data.description && <p class="post-desc">{post.data.description}</p>}
+              </a>
+              {post.data.tags.length > 0 && (
+                <div class="post-tags">
+                  {post.data.tags.map(tag => <span class="post-tag">#{tag}</span>)}
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p style="font-size: 0.875rem; color: var(--muted);">
+          <span class="nav-kr">아직 관련 글이 없습니다.</span>
+          <span class="nav-en">No related posts yet.</span>
+        </p>
+      )}
+    </section>
+
+  </main>
+</Layout>
+
+<style>
+  .proj-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  @media (max-width: 640px) {
+    .proj-header-row { flex-direction: column; gap: 0.5rem; }
+  }
+
+  .back-block {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    text-decoration: none;
+    font-size: 0.85rem;
+    color: var(--muted);
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .back-block:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 5%, var(--card));
+  }
+  .status-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    background: var(--border);
+    color: var(--muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .status-badge.ongoing {
+    background: color-mix(in srgb, var(--accent) 15%, transparent);
+    color: var(--accent);
+  }
+
+  /* 관련 글 목록 */
+  .post-item {
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .post-meta-top {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.4rem;
+  }
+  .post-category {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .post-date {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .post-link {
+    display: block;
+    text-decoration: none;
+  }
+  .post-link:hover .post-title { color: var(--accent); }
+  .post-title {
+    font-size: 0.975rem;
+    font-weight: 600;
+    color: var(--fg);
+    margin-bottom: 0.35rem;
+    line-height: 1.45;
+  }
+  .post-desc {
+    font-size: 0.855rem;
+    color: var(--muted);
+    line-height: 1.55;
+    margin-bottom: 0.5rem;
+  }
+  .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+  .post-tag {
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+</style>

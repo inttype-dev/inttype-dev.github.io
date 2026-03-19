@@ -1,0 +1,228 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+import { formatDate } from '@/utils/date';
+const recentPosts = (await getCollection('posts', ({ data }) => !data.draft && data.lang !== 'en'))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 5);
+
+const projects = (await getCollection('projects', ({ data }) => data.lang !== 'en'))
+  .sort((a, b) => {
+    if (b.data.priority !== a.data.priority) return b.data.priority - a.data.priority;
+    return new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf();
+  })
+  .slice(0, 6);
+
+---
+
+<Layout title="inttype">
+  <Header />
+  <main style="max-width:1080px;margin:0 auto;padding:0 1.5rem;">
+
+    <!-- Hero -->
+    <section class="hero-section">
+      <p style="font-size:0.85rem;color:var(--accent);font-weight:500;margin-bottom:0.75rem;letter-spacing:0.05em;">JUNIOR DEVELOPER</p>
+      <h1 class="hero-title">
+        <span class="nav-kr">안녕하세요,<br />개발자 inttype입니다.</span>
+        <span class="nav-en">Hi, I'm<br />inttype.</span>
+      </h1>
+      <p style="font-size:1.05rem;color:var(--muted);line-height:1.7;margin-bottom:2rem;">
+        <span class="nav-kr">개발하며 경험한 과정들을 기록하는 블로그입니다.</span>
+        <span class="nav-en">A blog documenting the journey of development.</span>
+      </p>
+      <div class="hero-buttons">
+        <a href="/posts" style="background:var(--accent);color:#fff;padding:0.6rem 1.25rem;border-radius:6px;font-size:0.9rem;font-weight:500;text-decoration:none;min-height:44px;display:flex;align-items:center;justify-content:center;"><span class="nav-kr">블로그 보기</span><span class="nav-en">View Blog</span></a>
+        <a href="/about" style="background:var(--card);border:1px solid var(--border);color:var(--fg);padding:0.6rem 1.25rem;border-radius:6px;font-size:0.9rem;font-weight:500;text-decoration:none;min-height:44px;display:flex;align-items:center;justify-content:center;"><span class="nav-kr">소개</span><span class="nav-en">About</span></a>
+      </div>
+    </section>
+
+    <hr style="border:none;border-top:1px solid var(--border);" />
+
+    <!-- Projects -->
+    <section style="padding:3rem 0;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <h2 style="font-size:1rem;font-weight:600;color:var(--fg);"><span class="nav-kr">프로젝트</span><span class="nav-en">Projects</span></h2>
+        <div style="display:flex;align-items:center;gap:1rem;">
+          <div style="display:flex;gap:0.4rem;">
+            <button id="slider-prev" aria-label="이전" data-label-kr="이전" data-label-en="Prev" style="width:2.75rem;height:2.75rem;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.9rem;transition:border-color 0.15s,color 0.15s;">‹</button>
+            <button id="slider-next" aria-label="다음" data-label-kr="다음" data-label-en="Next" style="width:2.75rem;height:2.75rem;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.9rem;transition:border-color 0.15s,color 0.15s;">›</button>
+          </div>
+          <a href="/projects" style="font-size:0.85rem;color:var(--accent);text-decoration:none;"><span class="nav-kr">전체 보기 →</span><span class="nav-en">View all →</span></a>
+        </div>
+      </div>
+      <div style="overflow:hidden;margin:-6px;padding:6px;">
+      <div class="proj-slider" id="proj-slider">
+        {projects.map((project, i) => (
+          <a
+            href={`/projects/${project.id}`}
+            style="border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--card);text-decoration:none;display:flex;flex-direction:column;transition:border-color 0.15s,transform 0.15s;"
+            class="proj-card"
+          >
+            <div style="width:100%;aspect-ratio:16/9;overflow:hidden;background:var(--border);">
+              {project.data.image
+                ? <img src={project.data.image} alt={project.data.name} loading={i === 0 ? 'eager' : 'lazy'} decoding="async" style="width:100%;height:100%;object-fit:cover;" />
+                : <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.2rem;font-weight:700;color:var(--muted);background:var(--card);">{project.data.name[0]}</div>
+              }
+            </div>
+            <div style="padding:1rem 1.1rem 1.1rem;display:flex;flex-direction:column;gap:0.45rem;flex:1;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem;">
+                <span style="font-size:0.9rem;font-weight:600;color:var(--fg);line-height:1.4;">{project.data.name}</span>
+                <span style={`font-size:0.68rem;padding:0.18rem 0.5rem;border-radius:999px;white-space:nowrap;flex-shrink:0;background:${project.data.status === '진행 중' ? 'rgba(37,99,235,0.12)' : 'var(--border)'};color:${project.data.status === '진행 중' ? 'var(--accent)' : 'var(--muted)'};`}>
+                  <span class="nav-kr">{project.data.status}</span>
+                  <span class="nav-en">{project.data.status === '진행 중' ? 'In Progress' : 'Completed'}</span>
+                </span>
+              </div>
+              <p style="font-size:0.8rem;color:var(--muted);line-height:1.5;flex:1;">{project.data.desc}</p>
+              <span style="font-size:0.75rem;color:var(--muted);">{formatDate(project.data.date)}</span>
+            </div>
+          </a>
+        ))}
+      </div>
+      </div>
+    </section>
+
+    <hr style="border:none;border-top:1px solid var(--border);" />
+
+    <!-- Recent Posts -->
+    <section style="padding:3rem 0;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <h2 style="font-size:1rem;font-weight:600;color:var(--fg);"><span class="nav-kr">최근 글</span><span class="nav-en">Recent Posts</span></h2>
+        <a href="/posts" style="font-size:0.85rem;color:var(--accent);text-decoration:none;"><span class="nav-kr">전체 보기 →</span><span class="nav-en">View all →</span></a>
+      </div>
+      <ul style="list-style:none;padding:0;margin:0;">
+        {recentPosts.map(post => (
+          <li>
+            <a href={`/posts/${post.id}`} class="recent-link" style="display:flex;align-items:baseline;justify-content:space-between;padding:0.85rem 0;border-bottom:1px solid var(--border);text-decoration:none;gap:1rem;">
+              <span class="recent-title" style="font-size:0.95rem;color:var(--fg);font-weight:500;">{post.data.title}</span>
+              <span style="font-size:0.8rem;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums;">
+                <span class="nav-kr">{post.data.pubDate.toLocaleDateString('ko-KR', { year:'numeric', month:'2-digit', day:'2-digit' })}</span><span class="nav-en">{post.data.pubDate.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' })}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+  </main>
+</Layout>
+
+<style>
+  .proj-slider {
+    display: flex;
+    gap: 1.25rem;
+    padding-bottom: 0.75rem;
+    will-change: transform;
+  }
+
+  .proj-card {
+    flex: 0 0 calc((100% - 2 * 1.25rem) / 3);
+    min-width: 240px;
+  }
+  .proj-card:hover {
+    border-color: var(--accent) !important;
+    transform: translateY(-3px);
+  }
+  .hero-section { padding: 5rem 0 3.5rem; max-width: 600px; }
+  .hero-title { font-size: 2.5rem; font-weight: 700; line-height: 1.2; margin-bottom: 1.25rem; color: var(--fg); }
+  .hero-buttons { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+  @media (max-width: 640px) {
+    .proj-card { flex: 0 0 calc(100% - 1.25rem); }
+    .hero-section { padding: 3rem 0 2.5rem; }
+    .hero-title { font-size: 1.8rem; }
+    .hero-buttons { flex-direction: column; }
+    .hero-buttons a { width: 100%; }
+  }
+  #slider-prev:hover, #slider-next:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .recent-link:hover .recent-title { color: var(--accent); }
+</style>
+
+<script>
+  // aria-label 언어 동기화
+  function syncAriaLabels() {
+    const lang = document.documentElement.getAttribute('data-lang') || 'ko';
+    document.querySelectorAll<HTMLElement>('[data-label-kr]').forEach(el => {
+      el.setAttribute('aria-label', lang === 'en' ? (el.dataset.labelEn ?? '') : (el.dataset.labelKr ?? ''));
+    });
+  }
+  syncAriaLabels();
+  new MutationObserver(syncAriaLabels).observe(document.documentElement, { attributes: true, attributeFilter: ['data-lang'] });
+
+  const slider = document.getElementById('proj-slider') as HTMLElement;
+  const prevBtn = document.getElementById('slider-prev');
+  const nextBtn = document.getElementById('slider-next');
+
+  if (slider) {
+    const realCards = [...slider.querySelectorAll<HTMLElement>('.proj-card')];
+    const realCount = realCards.length;
+
+    if (realCount <= 3) {
+      // 슬라이드 불필요 — 버튼 숨기기
+      [prevBtn, nextBtn].forEach(b => b && ((b as HTMLElement).style.display = 'none'));
+    } else {
+      // 앞 3개 카드 복사해서 끝에 추가 → 끝→앞 전환도 슬라이드 애니메이션 유지
+      realCards.slice(0, 3).forEach(card => {
+        const clone = card.cloneNode(true) as HTMLElement;
+        clone.setAttribute('aria-hidden', 'true');
+        slider.appendChild(clone);
+      });
+
+      let currentIndex = 0;
+      let isTransitioning = false;
+      let autoTimer: ReturnType<typeof setInterval>;
+
+      function getCardWidth(): number {
+        const card = slider.querySelector<HTMLElement>('.proj-card');
+        if (!card) return 0;
+        return card.offsetWidth + 20;
+      }
+
+      function slideTo(index: number, animate = true): void {
+        slider.style.transition = animate ? 'transform 0.45s ease' : 'none';
+        slider.style.transform = `translateX(-${index * getCardWidth()}px)`;
+        currentIndex = index;
+        if (!animate) isTransitioning = false;
+      }
+
+      // 애니메이션 종료 시 클론 구간이면 실제 위치로 순간이동
+      slider.addEventListener('transitionend', (e: Event) => {
+        if ((e as TransitionEvent).propertyName !== 'transform') return;
+        isTransitioning = false;
+        if (currentIndex >= realCount) {
+          slideTo(currentIndex - realCount, false);
+        }
+      });
+
+      function slideNext(): void {
+        if (isTransitioning) return;
+        isTransitioning = true;
+        slideTo(currentIndex + 1);
+      }
+
+      function slidePrev(): void {
+        if (isTransitioning) return;
+        isTransitioning = true;
+        slideTo(currentIndex <= 0 ? realCount - 3 : currentIndex - 1);
+      }
+
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      function startAuto(): void {
+        if (reducedMotion) return;
+        autoTimer = setInterval(slideNext, 3500);
+      }
+      function stopAuto(): void { clearInterval(autoTimer); }
+
+      prevBtn?.addEventListener('click', () => { stopAuto(); slidePrev(); startAuto(); });
+      nextBtn?.addEventListener('click', () => { stopAuto(); slideNext(); startAuto(); });
+      slider.addEventListener('mouseenter', stopAuto);
+      slider.addEventListener('mouseleave', startAuto);
+
+      startAuto();
+    }
+  }
+</script>

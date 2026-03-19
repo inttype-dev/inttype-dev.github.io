@@ -1,0 +1,73 @@
+---
+import '../styles/global.css';
+import Footer from '@/components/Footer.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string | null;
+  jsonLd?: object;
+  noindex?: boolean;
+}
+const {
+  title = 'inttype',
+  description = '개발 공부, 프로젝트 경험, 그리고 일상을 기록하는 블로그',
+  ogImage = null,
+  jsonLd,
+  noindex = false,
+} = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://inttype-dev.github.io');
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'inttype',
+  url: 'https://inttype-dev.github.io',
+  description: '개발 공부, 프로젝트 경험, 그리고 일상을 기록하는 블로그',
+  author: { '@type': 'Person', name: 'inttype' },
+};
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="/mascot/mascot.ico" />
+    <link rel="icon" type="image/svg+xml" href="/mascot/mascot.svg" />
+    <link rel="apple-touch-icon" href="/mascot/mascot-180x180.png" />
+    <meta name="generator" content={Astro.generator} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <!-- Twitter -->
+    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
+    <!-- JSON-LD -->
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd ?? websiteSchema)} />
+    <script is:inline>
+      (function () {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t ?? p);
+        var l = localStorage.getItem('lang') || 'ko';
+        document.documentElement.setAttribute('data-lang', l);
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="page-content">
+      <slot />
+    </div>
+    <Footer />
+  </body>
+</html>

@@ -1,0 +1,70 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+---
+
+<Layout title="About | inttype">
+  <Header />
+  <main style="max-width: 1080px; margin: 0 auto; padding: 0 1.5rem;">
+
+    <section style="padding: 3.5rem 0 2rem; border-bottom: 1px solid var(--border);">
+      <h1 style="font-size: 1.6rem; font-weight: 700; color: var(--fg); margin-bottom: 0.5rem;"><span class="nav-kr">소개</span><span class="nav-en">About</span></h1>
+      <p style="font-size: 0.9rem; color: var(--muted);">inttype / Junior Backend Developer</p>
+    </section>
+
+    <section style="padding: 2.5rem 0; border-bottom: 1px solid var(--border);">
+      <p class="nav-kr" style="font-size: 0.975rem; color: var(--fg); line-height: 1.8;">
+        개발하며 경험한 과정들을 기록하는 블로그입니다.
+      </p>
+      <p class="nav-en" style="font-size: 0.975rem; color: var(--fg); line-height: 1.8;">
+        A blog documenting the journey of development.
+      </p>
+    </section>
+
+    <section style="padding: 2.5rem 0; border-bottom: 1px solid var(--border);">
+      <h2 style="font-size: 0.95rem; font-weight: 600; color: var(--fg); margin-bottom: 1.25rem;"><span class="nav-kr">기술 스택</span><span class="nav-en">Tech Stack</span></h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+        {['Java', 'Spring Boot', 'JPA', 'MySQL', 'Docker', 'GitHub Actions'].map(skill => (
+          <span style="padding: 0.3rem 0.8rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.825rem; color: var(--muted); background: var(--card);">
+            {skill}
+          </span>
+        ))}
+      </div>
+    </section>
+
+    <section style="padding: 2.5rem 0;">
+      <h2 style="font-size: 0.95rem; font-weight: 600; color: var(--fg); margin-bottom: 1.25rem;"><span class="nav-kr">링크</span><span class="nav-en">Links</span></h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+        <a href="https://github.com/inttype-dev" target="_blank" rel="noopener noreferrer" class="link-card">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          GitHub
+        </a>
+      </div>
+    </section>
+
+  </main>
+</Layout>
+
+<style>
+  .link-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--fg);
+    text-decoration: none;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .link-card:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 6%, var(--card));
+  }
+</style>

@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://inttype-dev.github.io/sitemap-index.xml

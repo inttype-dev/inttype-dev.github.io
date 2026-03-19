@@ -1,0 +1,51 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+
+const allPosts = await getCollection('posts', ({ data }) => !data.draft && data.lang !== 'en');
+
+const tagMap = allPosts.flatMap(p => p.data.tags).reduce((acc, tag) => {
+  acc[tag] = (acc[tag] ?? 0) + 1;
+  return acc;
+}, {} as Record<string, number>);
+
+const tags = Object.entries(tagMap).sort((a, b) => b[1] - a[1]);
+---
+
+<Layout title="Tags | inttype">
+  <Header />
+  <main style="max-width: 1080px; margin: 0 auto; padding: 0 1.5rem;">
+
+    <section style="padding: 3.5rem 0 2rem; border-bottom: 1px solid var(--border);">
+      <h1 style="font-size: 1.6rem; font-weight: 700; color: var(--fg); margin-bottom: 0.4rem;"><span class="nav-kr">태그</span><span class="nav-en">Tags</span></h1>
+      <p style="font-size: 0.9rem; color: var(--muted);"><span class="nav-kr">{tags.length}개의 태그</span><span class="nav-en">{tags.length} tags</span></p>
+    </section>
+
+    <section style="padding: 2.5rem 0;">
+      <div style="display: flex; flex-wrap: wrap; gap: 0.6rem;">
+        {tags.map(([tag, count]) => (
+          <a
+            href={`/posts?tag=${encodeURIComponent(tag)}`}
+            style="display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.9rem; border: 1px solid var(--border); border-radius: 999px; text-decoration: none; transition: all 0.15s;"
+            class="tag-link"
+          >
+            <span style="font-size: 0.85rem; color: var(--fg);">#{tag}</span>
+            <span style="font-size: 0.75rem; color: var(--muted);">{count}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+  </main>
+</Layout>
+
+<style>
+  .tag-link:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .tag-link:hover span {
+    color: var(--accent);
+  }
+</style>

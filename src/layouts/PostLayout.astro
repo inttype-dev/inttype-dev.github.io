@@ -1,0 +1,513 @@
+---
+import Layout from './Layout.astro';
+import Header from '@/components/Header.astro';
+
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface PostRef {
+  id: string;
+  title: string;
+  pubDate: Date;
+}
+
+interface Props {
+  title: string;
+  description?: string;
+  pubDate: Date;
+  tags?: string[];
+  headings?: Heading[];
+  enTitle?: string;
+  enDescription?: string;
+  enTags?: string[];
+  hasEnTranslation?: boolean;
+  readingTime?: number;
+  postId?: string;
+  prevPost?: PostRef | null;
+  nextPost?: PostRef | null;
+  projectSlug?: string | null;
+  navMapJson?: string;
+}
+
+const { title, description, pubDate, tags = [], headings = [], enTitle, enDescription, enTags, hasEnTranslation = false, readingTime, postId, prevPost, nextPost, projectSlug, navMapJson } = Astro.props;
+const backHref = projectSlug ? `/projects/${projectSlug}` : '/posts';
+const dateStrKr = pubDate.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+const dateStrEn = pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+const tocItems = headings.filter(h => h.depth <= 3);
+const hasEn = hasEnTranslation;
+
+const blogPostingSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: title,
+  description: description ?? '',
+  datePublished: pubDate.toISOString(),
+  author: { '@type': 'Person', name: 'inttype', url: 'https://inttype-dev.github.io/about' },
+  publisher: { '@type': 'Person', name: 'inttype', url: 'https://inttype-dev.github.io' },
+  keywords: tags.join(', '),
+};
+---
+
+<Layout title={`${title} | inttype`} description={description} jsonLd={blogPostingSchema}>
+  <Header />
+  <div class="post-wrapper">
+
+    <!-- 본문 -->
+    <article class="post-article" data-post-id={postId}>
+      <header class="post-header">
+        <!-- KR 헤더 -->
+        <div class={hasEn ? 'lang-kr' : undefined}>
+          <h1 style="font-size:1.8rem;font-weight:700;color:var(--fg);line-height:1.35;margin-bottom:0.75rem;">{title}</h1>
+          {description && <p style="font-size:0.95rem;color:var(--muted);line-height:1.6;margin-bottom:1rem;">{description}</p>}
+        </div>
+
+        <!-- EN 헤더 (번역본 있을 때만) -->
+        {hasEn && (
+          <div class="lang-en">
+            <h1 style="font-size:1.8rem;font-weight:700;color:var(--fg);line-height:1.35;margin-bottom:0.75rem;">{enTitle ?? title}</h1>
+            {(enDescription ?? description) && (
+              <p style="font-size:0.95rem;color:var(--muted);line-height:1.6;margin-bottom:1rem;">{enDescription ?? description}</p>
+            )}
+          </div>
+        )}
+
+        <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+          <span style="font-size:0.85rem;color:var(--muted);font-variant-numeric:tabular-nums;"><span class="nav-kr">{dateStrKr}</span><span class="nav-en">{dateStrEn}</span></span>
+          {readingTime && (
+            <>
+              <span style="font-size:0.85rem;color:var(--muted);" aria-hidden="true">·</span>
+              <span style="font-size:0.85rem;color:var(--muted);">
+                <span class="nav-kr">약 {readingTime}분</span><span class="nav-en">~{readingTime} min read</span>
+              </span>
+            </>
+          )}
+          <span style="font-size:0.85rem;color:var(--muted);display:none;" id="view-count-wrap" aria-live="polite">
+            <span aria-hidden="true">· </span><span id="view-count"></span> <span class="nav-kr">회</span><span class="nav-en">views</span>
+          </span>
+        </div>
+      </header>
+
+      <!-- KR 본문 -->
+      <div class={`prose${hasEn ? ' lang-kr' : ''}`}>
+        <slot />
+      </div>
+
+      <!-- EN 본문 (번역본 있을 때만) -->
+      {hasEn && (
+        <div class="prose lang-en">
+          <slot name="en" />
+        </div>
+      )}
+
+      <!-- 하단 태그 -->
+      {tags.length > 0 && (
+        <div class="post-tags-bottom">
+          <div class={hasEn ? 'lang-kr' : undefined} style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+            {tags.map(tag => (
+              <a href={`/posts?tag=${encodeURIComponent(tag)}`} class="post-tag-link">#{tag}</a>
+            ))}
+          </div>
+          {hasEn && (
+            <div class="lang-en" style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+              {(enTags ?? tags).map(tag => (
+                <a href={`/posts?tag=${encodeURIComponent(tag)}`} class="post-tag-link">#{tag}</a>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      <!-- 하단 네비게이션 -->
+      <nav class="post-nav" aria-label="post navigation">
+        {navMapJson && <script type="application/json" id="nav-map" set:html={navMapJson} />}
+        <div class="post-nav-grid" id="post-nav-grid">
+          <!-- 이전글 (더 오래된 글) -->
+          {prevPost ? (
+            <a href={`/posts/${prevPost.id}`} class="post-nav-card" id="nav-prev">
+              <span class="post-nav-label">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                <span class="nav-kr">이전 글</span><span class="nav-en">Previous</span>
+              </span>
+              <span class="post-nav-title">{prevPost.title}</span>
+              <span class="post-nav-date"><span class="nav-kr">{prevPost.pubDate.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span><span class="nav-en">{prevPost.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span></span>
+            </a>
+          ) : <div class="post-nav-empty" id="nav-prev" />}
+
+          <!-- 다음글 (더 최신 글) -->
+          {nextPost ? (
+            <a href={`/posts/${nextPost.id}`} class="post-nav-card post-nav-card--next" id="nav-next">
+              <span class="post-nav-label post-nav-label--next">
+                <span class="nav-kr">다음 글</span><span class="nav-en">Next</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+              </span>
+              <span class="post-nav-title">{nextPost.title}</span>
+              <span class="post-nav-date"><span class="nav-kr">{nextPost.pubDate.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span><span class="nav-en">{nextPost.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span></span>
+            </a>
+          ) : <div class="post-nav-empty" id="nav-next" />}
+        </div>
+
+        <!-- 목록으로 -->
+        <a href={backHref} class="post-nav-back-block" id="nav-back">
+          <span class="nav-kr">{projectSlug ? '← 프로젝트로' : '← 목록으로'}</span>
+          <span class="nav-en">{projectSlug ? '← Back to project' : '← All posts'}</span>
+        </a>
+      </nav>
+    </article>
+
+    <!-- TOC 사이드바 -->
+    {tocItems.length > 0 && (
+      <aside class="toc-sidebar">
+        <p class="toc-label"><span class="nav-kr">목차</span><span class="nav-en">Contents</span></p>
+        <ul class="toc-list">
+          {tocItems.map(h => (
+            <li>
+              <a
+                href={`#${h.slug}`}
+                class="toc-link"
+                data-slug={h.slug}
+                style={h.depth === 3 ? 'padding-left:1rem;' : ''}
+              >
+                {h.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </aside>
+    )}
+
+  </div>
+</Layout>
+
+<style>
+  .post-wrapper {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 1.5rem 4rem;
+    display: grid;
+    grid-template-columns: 1fr 160px;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .post-article { min-width: 0; }
+
+  .post-header {
+    padding: 3.5rem 0 2.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* TOC */
+  .toc-sidebar {
+    position: sticky;
+    top: 5rem;
+    padding-top: 3.5rem;
+  }
+  .toc-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 0.75rem;
+  }
+  .toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-left: 2px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+  .toc-link {
+    display: block;
+    padding: 0.3rem 0 0.3rem 0.85rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-decoration: none;
+    line-height: 1.4;
+    border-left: 2px solid transparent;
+    margin-left: -2px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .toc-link:hover { color: var(--fg); }
+  .toc-link.active {
+    color: var(--accent);
+    border-left-color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* Prose */
+  .prose {
+    font-size: 0.975rem;
+    line-height: 1.8;
+    color: var(--fg);
+    padding: 2.5rem 0 3rem;
+  }
+  .prose :global(h1), .prose :global(h2), .prose :global(h3) {
+    font-weight: 600;
+    color: var(--fg);
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+  }
+  .prose :global(h2) { font-size: 1.25rem; }
+  .prose :global(h3) { font-size: 1.05rem; }
+  .prose :global(p) { margin-bottom: 1.25rem; }
+  .prose :global(a) { color: var(--accent); text-decoration: underline; }
+  .prose :global(code) {
+    font-family: 'Geist Mono', 'Fira Code', monospace;
+    font-size: 0.875em;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+  }
+  .prose :global(pre) {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+  }
+  .prose :global(pre code) { background: none; border: none; padding: 0; font-size: 0.875rem; }
+  .prose :global(blockquote) {
+    border-left: 3px solid var(--accent);
+    padding-left: 1rem;
+    color: var(--muted);
+    margin: 1.5rem 0;
+  }
+  .prose :global(ul), .prose :global(ol) { padding-left: 1.5rem; margin-bottom: 1.25rem; }
+  .prose :global(li) { margin-bottom: 0.4rem; }
+  .prose :global(img) { max-width: 100%; border-radius: 8px; border: 1px solid var(--border); margin: 1.5rem 0; }
+  .prose :global(hr) { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+  .prose :global(table) { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.9rem; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .prose :global(th), .prose :global(td) { border: 1px solid var(--border); padding: 0.5rem 0.75rem; text-align: left; white-space: nowrap; }
+  .prose :global(th) { background: var(--card); font-weight: 600; }
+
+  /* 하단 태그 */
+  .post-tags-bottom {
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--border);
+  }
+  .post-tag-link {
+    font-size: 0.82rem;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 0.25rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .post-tag-link:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* 하단 네비게이션 */
+  .post-nav {
+    border-top: 1px solid var(--border);
+    padding: 2rem 0 0;
+  }
+  :global(#post-nav-grid) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  :global(.post-nav-empty) { display: block; }
+  :global(.post-nav-card) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card);
+    text-decoration: none;
+    transition: border-color 0.15s, background 0.15s;
+    min-width: 0;
+  }
+  :global(.post-nav-card:hover) {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 5%, var(--card));
+  }
+  :global(.post-nav-card--next) { text-align: right; align-items: flex-end; }
+  :global(.post-nav-label) {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  :global(.post-nav-label--next) { justify-content: flex-end; }
+  :global(.post-nav-title) {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--fg);
+    line-height: 1.45;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  :global(.post-nav-date) { font-size: 0.75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .post-nav-back-block {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    text-decoration: none;
+    font-size: 0.85rem;
+    color: var(--muted);
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+    margin-bottom: 2rem;
+  }
+  .post-nav-back-block:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 5%, var(--card));
+  }
+
+  @media (max-width: 640px) {
+    .post-wrapper { padding: 0 1rem 3rem; gap: 1.5rem; }
+    .post-header { padding: 2rem 0 1.5rem; }
+    .prose { padding: 1.5rem 0 2rem; font-size: 0.925rem; }
+    .prose :global(h2) { font-size: 1.1rem; }
+    .prose :global(h3) { font-size: 1rem; }
+    .prose :global(pre) { padding: 0.75rem; border-radius: 6px; }
+    .prose :global(th), .prose :global(td) { padding: 0.35rem 0.5rem; font-size: 0.8rem; }
+    :global(#post-nav-grid) { grid-template-columns: 1fr; }
+    :global(.post-nav-card--next) { text-align: left; align-items: flex-start; }
+    :global(.post-nav-label--next) { justify-content: flex-start; }
+    .post-nav-back-block { min-height: 44px; }
+  }
+
+  /* TOC 없을 때 단일 컬럼 */
+  @media (max-width: 900px) {
+    .post-wrapper { grid-template-columns: 1fr; }
+    .toc-sidebar { display: none; }
+  }
+</style>
+
+<script>
+  // 목록으로 링크 — ?cat= 파라미터 기반 업데이트 (프로젝트 글 포함)
+  (function () {
+    const cat = new URLSearchParams(location.search).get('cat');
+    if (!cat) return;
+    const backEl = document.getElementById('nav-back') as HTMLAnchorElement | null;
+    if (backEl) {
+      backEl.href = `/posts?cat=${encodeURIComponent(cat)}`;
+    }
+  })();
+</script>
+
+<script>
+  // 조회수 (localStorage 기반, 세션당 1회 증가)
+  const postId = document.getElementById('view-count-wrap')?.closest('[data-post-id]')?.getAttribute('data-post-id');
+  if (postId) {
+    const key = `views:${postId}`;
+    const sessionKey = `viewed:${postId}`;
+    let count = parseInt(localStorage.getItem(key) ?? '0', 10);
+    if (!sessionStorage.getItem(sessionKey)) {
+      count++;
+      localStorage.setItem(key, String(count));
+      sessionStorage.setItem(sessionKey, '1');
+    }
+    const el = document.getElementById('view-count');
+    const wrap = document.getElementById('view-count-wrap');
+    if (el && wrap) {
+      el.textContent = count.toLocaleString();
+      wrap.style.display = '';
+    }
+  }
+</script>
+
+<script>
+  // 카테고리 컨텍스트 기반 이전/다음 글 업데이트
+  (function () {
+    const mapEl = document.getElementById('nav-map');
+    if (!mapEl) return;
+
+    const navMap: Record<string, { prev: { id: string; title: string; dateKr: string; dateEn: string } | null; next: { id: string; title: string; dateKr: string; dateEn: string } | null }> = JSON.parse(mapEl.textContent ?? '{}');
+    const params = new URLSearchParams(location.search);
+    const cat = params.get('cat') ?? '전체';
+
+    const entry = navMap[cat] ?? navMap['전체'];
+    if (!entry) return;
+
+    const backEl = document.getElementById('nav-back') as HTMLAnchorElement | null;
+
+    function escapeHtml(str: string): string {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function svgLeft() {
+      return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>';
+    }
+    function svgRight() {
+      return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>';
+    }
+
+    function makeCard(ref: { id: string; title: string; dateKr: string; dateEn: string } | null, isPrev: boolean): string {
+      if (!ref) return `<div class="post-nav-empty" id="${isPrev ? 'nav-prev' : 'nav-next'}"></div>`;
+      const id = isPrev ? 'nav-prev' : 'nav-next';
+      const dateHtml = `<span class="post-nav-date"><span class="nav-kr">${escapeHtml(ref.dateKr)}</span><span class="nav-en">${escapeHtml(ref.dateEn)}</span></span>`;
+      if (isPrev) {
+        return `<a href="/posts/${escapeHtml(ref.id)}" class="post-nav-card" id="${id}">
+          <span class="post-nav-label">${svgLeft()}<span class="nav-kr">이전 글</span><span class="nav-en">Previous</span></span>
+          <span class="post-nav-title">${escapeHtml(ref.title)}</span>
+          ${dateHtml}
+        </a>`;
+      } else {
+        return `<a href="/posts/${escapeHtml(ref.id)}" class="post-nav-card post-nav-card--next" id="${id}">
+          <span class="post-nav-label post-nav-label--next"><span class="nav-kr">다음 글</span><span class="nav-en">Next</span>${svgRight()}</span>
+          <span class="post-nav-title">${escapeHtml(ref.title)}</span>
+          ${dateHtml}
+        </a>`;
+      }
+    }
+
+    const grid = document.getElementById('post-nav-grid');
+    if (grid && (cat !== '전체')) {
+      grid.innerHTML = makeCard(entry.prev, true) + makeCard(entry.next, false);
+    }
+
+    // 목록으로 href에 ?cat= 추가
+    if (backEl && cat !== '전체') {
+      const base = backEl.getAttribute('href')?.split('?')[0] ?? '/posts';
+      backEl.href = `${base}?cat=${encodeURIComponent(cat)}`;
+    }
+  })();
+</script>
+
+<script>
+  // TOC 스크롤 spy
+  const links = document.querySelectorAll<HTMLAnchorElement>('.toc-link');
+  if (links.length > 0) {
+    const headingEls = [...links].map(l => document.getElementById(l.dataset.slug!)).filter(Boolean) as HTMLElement[];
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          links.forEach(l => l.classList.remove('active'));
+          const active = document.querySelector<HTMLAnchorElement>(`.toc-link[data-slug="${entry.target.id}"]`);
+          active?.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-10% 0px -80% 0px' });
+
+    headingEls.forEach(el => observer.observe(el));
+    window.addEventListener('beforeunload', () => observer.disconnect(), { once: true });
+  }
+</script>
