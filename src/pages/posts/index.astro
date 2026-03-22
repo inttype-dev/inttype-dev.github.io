@@ -6,6 +6,10 @@ import Header from '@/components/Header.astro';
 const allPosts = (await getCollection('posts', ({ data }) => !data.draft && data.lang !== 'en'))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
+const allProjects = await getCollection('projects');
+const projectIds = new Set(allProjects.map(p => p.id));
+const isProjectPost = (id: string) => projectIds.has(id.split('/')[0]);
+
 const categories = ['전체', '개발', '프로젝트', '일상'];
 const categoryEn: Record<string, string> = {
   '전체': 'All',
@@ -17,9 +21,9 @@ const allTags = [...new Set(allPosts.flatMap(p => p.data.tags))].sort();
 
 const categoryCounts = categories.slice(1).reduce((acc, cat) => {
   if (cat === '프로젝트') {
-    acc[cat] = allPosts.filter(p => !!p.data.project).length;
+    acc[cat] = allPosts.filter(p => isProjectPost(p.id)).length;
   } else {
-    acc[cat] = allPosts.filter(p => p.data.category === cat && !p.data.project).length;
+    acc[cat] = allPosts.filter(p => p.data.category === cat && !isProjectPost(p.id)).length;
   }
   return acc;
 }, {} as Record<string, number>);
@@ -82,11 +86,11 @@ const categoryCounts = categories.slice(1).reduce((acc, cat) => {
       <ul id="post-list">
         {allPosts.map(post => (
           <li
-            data-category={post.data.project ? '프로젝트' : post.data.category}
+            data-category={isProjectPost(post.id) ? '프로젝트' : post.data.category}
             data-tags={post.data.tags.join(',')}
           >
             <div class="post-meta-top">
-              <span class="post-category">{post.data.project ? '프로젝트' : post.data.category}</span>
+              <span class="post-category">{isProjectPost(post.id) ? '프로젝트' : post.data.category}</span>
               <span class="post-date">
                 <span class="nav-kr">{post.data.pubDate.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span><span class="nav-en">{post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
               </span>
@@ -374,6 +378,14 @@ const categoryCounts = categories.slice(1).reduce((acc, cat) => {
     });
   }
 
+  const postArea = document.querySelector<HTMLElement>('.post-area');
+
+  function scrollToPostArea() {
+    if (!postArea) return;
+    const top = postArea.getBoundingClientRect().top + window.scrollY - 80;
+    if (window.scrollY > top) window.scrollTo({ top, behavior: 'instant' });
+  }
+
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       filterBtns.forEach(b => b.classList.remove('active'));
@@ -383,6 +395,7 @@ const categoryCounts = categories.slice(1).reduce((acc, cat) => {
       activeTag = '';
       tagPills.forEach(p => p.classList.remove('active'));
       applyFilter();
+      scrollToPostArea();
     });
   });
 
@@ -398,6 +411,7 @@ const categoryCounts = categories.slice(1).reduce((acc, cat) => {
         pill.classList.add('active');
       }
       applyFilter();
+      scrollToPostArea();
     });
   });
 

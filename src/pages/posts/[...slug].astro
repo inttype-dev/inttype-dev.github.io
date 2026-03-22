@@ -17,8 +17,11 @@ const allPosts = await getCollection('posts');
 const enPost = allPosts.find(p => p.data.translationOf === post.id && p.data.lang === 'en');
 const enRendered = enPost ? await render(enPost) : null;
 
-// 이전글 / 다음글
-const projectSlug = post.data.project ?? null;
+// 프로젝트 글 감지: post.id 첫 세그먼트가 프로젝트 ID인지 확인
+const allProjects = await getCollection('projects');
+const projectIds = new Set(allProjects.map(p => p.id));
+const firstSegment = post.id.split('/')[0];
+const projectSlug = projectIds.has(firstSegment) ? firstSegment : null;
 
 type PostRefJSON = { id: string; title: string; dateKr: string; dateEn: string } | null;
 const toRef = (p: (typeof allPosts)[0]) => ({
@@ -35,7 +38,7 @@ let navMapJson = '';
 if (projectSlug) {
   // 프로젝트 글 → 프로젝트 내 이전/다음
   const pool = allPosts
-    .filter(p => !p.data.draft && p.data.lang !== 'en' && p.data.project === projectSlug)
+    .filter(p => !p.data.draft && p.data.lang !== 'en' && p.id.startsWith(projectSlug + '/'))
     .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
   const i = pool.findIndex(p => p.id === post.id);
   prevPost = i < pool.length - 1 ? { id: pool[i+1].id, title: pool[i+1].data.title, pubDate: pool[i+1].data.pubDate } : null;
@@ -43,7 +46,7 @@ if (projectSlug) {
 } else {
   // 일반 글 → 카테고리별 navMap 빌드
   const base = allPosts
-    .filter(p => !p.data.draft && p.data.lang !== 'en' && !p.data.project)
+    .filter(p => !p.data.draft && p.data.lang !== 'en' && !projectIds.has(p.id.split('/')[0]))
     .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
   const navMap: Record<string, { prev: PostRefJSON; next: PostRefJSON }> = {};

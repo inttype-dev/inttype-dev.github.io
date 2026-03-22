@@ -5,12 +5,12 @@ import Header from '@/components/Header.astro';
 
 const allProjectEntries = await getCollection('projects');
 
+const parseDate = (d: string) => new Date(d.length === 7 ? `${d}-01` : d);
+const sortDate = (p: typeof allProjectEntries[0]) => parseDate(p.data.endDate ?? p.data.startDate);
+
 const krProjects = allProjectEntries
   .filter(p => p.data.lang !== 'en')
-  .sort((a, b) => {
-    if (b.data.priority !== a.data.priority) return b.data.priority - a.data.priority;
-    return new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf();
-  });
+  .sort((a, b) => sortDate(b).valueOf() - sortDate(a).valueOf());
 
 const enProjectMap = Object.fromEntries(
   allProjectEntries
@@ -24,7 +24,7 @@ const postsByProject = krProjects.map(project => ({
   project,
   enProject: enProjectMap[project.id],
   posts: allPosts
-    .filter(p => p.data.project === project.id)
+    .filter(p => p.id.startsWith(project.id + '/'))
     .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()),
 }));
 ---
@@ -70,9 +70,9 @@ const postsByProject = krProjects.map(project => ({
                 <p class={enProject ? 'lang-kr' : undefined} style="font-size:0.85rem;color:var(--muted);line-height:1.5;">{project.data.desc}</p>
                 {enProject && <p class="lang-en" style="font-size:0.85rem;color:var(--muted);line-height:1.5;">{enProject.data.desc}</p>}
               </div>
-              <div style="display:flex;flex-wrap:wrap;gap:0.35rem;">
+              <div class="tag-row" data-tags-row>
                 {project.data.tags.map(tag => (
-                  <span style="font-size:0.75rem;color:var(--muted);border:1px solid var(--border);border-radius:4px;padding:0.15rem 0.45rem;">{tag}</span>
+                  <span class="proj-tag">{tag}</span>
                 ))}
               </div>
             </div>
@@ -108,7 +108,11 @@ const postsByProject = krProjects.map(project => ({
                   class="github-btn"
                   onclick="event.stopPropagation()"
                 >
-                  <span class="nav-kr">사이트 →</span><span class="nav-en">Live →</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                  </svg>
+                  Link
                 </a>
               )}
               <div style="display:flex;align-items:center;justify-content:flex-end;gap:0.4rem;color:var(--muted);">
@@ -153,6 +157,30 @@ const postsByProject = krProjects.map(project => ({
 </Layout>
 
 <style>
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    overflow: hidden;
+    max-height: 1.6rem;
+  }
+  .proj-tag {
+    font-size: 0.75rem;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.15rem 0.45rem;
+    white-space: nowrap;
+  }
+  :global(.proj-tag-more) {
+    font-size: 0.75rem;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.15rem 0.45rem;
+    white-space: nowrap;
+  }
+
   .project-row {
     width: 100%;
     display: flex;
@@ -255,4 +283,37 @@ const postsByProject = krProjects.map(project => ({
       drawer.style.display = isOpen ? 'none' : 'block';
     });
   });
+
+  function truncateTags(container: HTMLElement) {
+    const tags = Array.from(container.querySelectorAll<HTMLElement>('.proj-tag:not(.proj-tag-more)'));
+    if (tags.length < 2) return;
+
+    // 기존 +N 뱃지 제거 및 태그 복원
+    container.querySelector('.proj-tag-more')?.remove();
+    tags.forEach(t => (t.style.display = ''));
+
+    const firstTop = tags[0].getBoundingClientRect().top;
+    const overflowIdx = tags.findIndex((t, i) => i > 0 && t.getBoundingClientRect().top > firstTop + 2);
+    if (overflowIdx === -1) return;
+
+    for (let i = overflowIdx; i < tags.length; i++) tags[i].style.display = 'none';
+
+    let hiddenCount = tags.length - overflowIdx;
+    const badge = document.createElement('span');
+    badge.className = 'proj-tag-more';
+    badge.textContent = `+${hiddenCount}`;
+    container.appendChild(badge);
+
+    // 뱃지도 넘치면 앞 태그 하나 더 숨김
+    if (badge.getBoundingClientRect().top > firstTop + 2 && overflowIdx > 0) {
+      tags[overflowIdx - 1].style.display = 'none';
+      badge.textContent = `+${++hiddenCount}`;
+    }
+  }
+
+  const tagRows = document.querySelectorAll<HTMLElement>('[data-tags-row]');
+  tagRows.forEach(truncateTags);
+
+  const ro = new ResizeObserver(() => tagRows.forEach(truncateTags));
+  ro.observe(document.body);
 </script>

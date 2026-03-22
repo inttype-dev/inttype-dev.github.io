@@ -9,8 +9,9 @@ const recentPosts = (await getCollection('posts', ({ data }) => !data.draft && d
 
 const projects = (await getCollection('projects', ({ data }) => data.lang !== 'en'))
   .sort((a, b) => {
-    if (b.data.priority !== a.data.priority) return b.data.priority - a.data.priority;
-    return new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf();
+    const parseDate = (d: string) => new Date(d.length === 7 ? `${d}-01` : d);
+    const sortDate = (p: typeof a) => parseDate(p.data.endDate ?? p.data.startDate);
+    return sortDate(b).valueOf() - sortDate(a).valueOf();
   })
   .slice(0, 6);
 
@@ -74,7 +75,9 @@ const projects = (await getCollection('projects', ({ data }) => data.lang !== 'e
                 </span>
               </div>
               <p style="font-size:0.8rem;color:var(--muted);line-height:1.5;flex:1;">{project.data.desc}</p>
-              <span style="font-size:0.75rem;color:var(--muted);">{formatDate(project.data.date)}</span>
+              <span style="font-size:0.75rem;color:var(--muted);">
+                {formatDate(project.data.startDate)}{project.data.endDate ? ` - ${formatDate(project.data.endDate)}` : ''}
+              </span>
             </div>
           </a>
         ))}
