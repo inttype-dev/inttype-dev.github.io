@@ -1,7 +1,7 @@
 ---
 title: "LinguaGen 프로젝트 소개 및 개발 배경"
 description: "생성형 AI를 활용한 영어 학습 플랫폼 소개 및 개발 배경"
-pubDate: 2026-03-23
+pubDate: 2026-03-23T00:00:00
 tags: ["React", "Java", "Spring Boot", "MySQL", "AWS", "Docker"]
 draft: true
 ---

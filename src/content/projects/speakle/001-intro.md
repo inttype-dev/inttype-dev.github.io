@@ -1,7 +1,7 @@
 ---
 title: "Speakle 프로젝트 소개 및 개발 배경"
 description: "빅데이터 팝송 추천으로 실전 영어 회화를 완성하는 AI 기반 음악 영어 학습 플랫폼 소개 및 개발 배경"
-pubDate: 2026-03-23
+pubDate: 2026-03-23T00:50:00
 tags: ["React", "TypeScript", "Java", "Spring Boot", "Python", "FastAPI", "PostgreSQL", "Weaviate", "Redis", "Jenkins", "AWS", "Docker"]
 draft: true
 ---

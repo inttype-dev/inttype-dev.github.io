@@ -1,7 +1,7 @@
 ---
 title: "GitLab MR Auto Code Review 프로젝트 소개 및 개발 배경"
 description: "GitLab Merge Request에 AI 자동 코드 리뷰를 붙이는 서비스 소개 및 개발 배경"
-pubDate: 2026-03-23
+pubDate: 2026-03-23T00:40:00
 tags: ["Java", "Spring Boot", "GitLab API", "AWS", "Docker"]
 draft: true
 ---

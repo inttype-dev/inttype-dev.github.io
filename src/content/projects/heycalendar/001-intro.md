@@ -1,7 +1,7 @@
 ---
 title: "HeyCalendar 프로젝트 소개 및 개발 배경"
 description: "원스톱 장학금 통합 관리 플랫폼 소개 및 개발 배경"
-pubDate: 2026-03-23
+pubDate: 2026-03-23T00:30:00
 tags: ["React Native", "Java", "Spring Boot", "MyBatis", "MySQL", "Docker", "AWS"]
 draft: true
 ---

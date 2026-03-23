@@ -1,7 +1,7 @@
 ---
 title: "TourTalk 프로젝트 소개 및 개발 배경"
 description: "지역 기반 통합 여행 정보 제공 및 큐레이터 해설 연계 플랫폼 소개 및 개발 배경"
-pubDate: 2025-04-28
+pubDate: 2026-03-23T00:10:00
 tags: ["Vue.js", "Java", "Spring Boot", "Python", "MySQL"]
 draft: true
 ---
