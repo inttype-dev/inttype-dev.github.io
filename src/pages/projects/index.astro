@@ -4,12 +4,13 @@ import Layout from '@/layouts/Layout.astro';
 import Header from '@/components/Header.astro';
 
 const allProjectEntries = await getCollection('projects');
+const allPostEntries = await getCollection('posts');
 
 const parseDate = (d: string) => new Date(d.length === 7 ? `${d}-01` : d);
 const sortDate = (p: typeof allProjectEntries[0]) => parseDate(p.data.endDate ?? p.data.startDate);
 
 const krProjects = allProjectEntries
-  .filter(p => p.data.lang !== 'en')
+  .filter(p => p.data.lang !== 'en' && !!p.data.name)
   .sort((a, b) => sortDate(b).valueOf() - sortDate(a).valueOf());
 
 const enProjectMap = Object.fromEntries(
@@ -18,15 +19,16 @@ const enProjectMap = Object.fromEntries(
     .map(p => [p.data.translationOf!, p])
 );
 
-const allPosts = await getCollection('posts', ({ data }) => !data.draft && data.lang !== 'en');
-
-const postsByProject = krProjects.map(project => ({
-  project,
-  enProject: enProjectMap[project.id],
-  posts: allPosts
-    .filter(p => p.id.startsWith(project.id + '/'))
-    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()),
-}));
+const postsByProject = krProjects.map(project => {
+  const folder = project.id.split('/')[0];
+  return {
+    project,
+    enProject: enProjectMap[project.id],
+    posts: allPostEntries
+      .filter(p => !p.data.draft && p.data.lang !== 'en' && p.id.startsWith(folder + '/'))
+      .sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf()),
+  };
+});
 ---
 
 <Layout title="프로젝트 | inttype">

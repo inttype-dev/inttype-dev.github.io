@@ -10,7 +10,7 @@ const allProjects = await getCollection('projects');
 const projectIds = new Set(allProjects.map(p => p.id));
 const isProjectPost = (id: string) => projectIds.has(id.split('/')[0]);
 
-const categories = ['전체', '개발', '프로젝트', '일상'];
+const categories = ['전체', '개발', '일상', '프로젝트'];
 const categoryEn: Record<string, string> = {
   '전체': 'All',
   '개발': 'Dev',
@@ -94,6 +94,12 @@ const categoryCounts = categories.slice(1).reduce((acc, cat) => {
               <span class="post-date">
                 <span class="nav-kr">{post.data.pubDate.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span><span class="nav-en">{post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
               </span>
+              {post.data.series && (
+                <span class="post-series-badge">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+                  {post.data.series}
+                </span>
+              )}
             </div>
             <a href={`/posts/${post.id}`} class="post-link" data-base={`/posts/${post.id}`}>
               <h2 class="post-title-item">{post.data.title}</h2>
@@ -263,6 +269,17 @@ const categoryCounts = categories.slice(1).reduce((acc, cat) => {
     font-size: 0.8rem;
     color: var(--muted);
     font-variant-numeric: tabular-nums;
+  }
+  .post-series-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, var(--card));
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
   }
   .post-link {
     text-decoration: none;

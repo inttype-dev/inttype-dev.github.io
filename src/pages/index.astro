@@ -7,13 +7,13 @@ const recentPosts = (await getCollection('posts', ({ data }) => !data.draft && d
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .slice(0, 5);
 
-const projects = (await getCollection('projects', ({ data }) => data.lang !== 'en'))
+const projects = (await getCollection('projects', ({ data }) => data.lang !== 'en' && !!data.name))
   .sort((a, b) => {
     const parseDate = (d: string) => new Date(d.length === 7 ? `${d}-01` : d);
     const sortDate = (p: typeof a) => parseDate(p.data.endDate ?? p.data.startDate);
     return sortDate(b).valueOf() - sortDate(a).valueOf();
   })
-  .slice(0, 6);
+;
 
 ---
 

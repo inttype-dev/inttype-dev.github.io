@@ -35,6 +35,21 @@ let prevPost: { id: string; title: string; pubDate: Date } | null = null;
 let nextPost: { id: string; title: string; pubDate: Date } | null = null;
 let navMapJson = '';
 
+let seriesPosts: { id: string; title: string; isCurrent: boolean; numStr: string }[] | null = null;
+if (post.data.series) {
+  const sPool = allPosts
+    .filter(p => p.data.series === post.data.series && p.data.lang !== 'en')
+    .sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf());
+  if (sPool.length > 1) {
+    seriesPosts = sPool.map((p, idx) => ({
+      id: p.id,
+      title: p.data.title,
+      isCurrent: p.id === post.id,
+      numStr: String(idx + 1)
+    }));
+  }
+}
+
 if (projectSlug) {
   // 프로젝트 글 → 프로젝트 내 이전/다음
   const pool = allPosts
@@ -90,6 +105,8 @@ function calcReadingTime(body: string): number {
   nextPost={nextPost}
   projectSlug={projectSlug}
   navMapJson={navMapJson || undefined}
+  seriesName={post.data.series}
+  seriesPosts={seriesPosts}
 >
   <Content />
   {enRendered && <enRendered.Content slot="en" />}

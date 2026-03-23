@@ -23,6 +23,7 @@ const posts = defineCollection({
     draft: z.boolean().default(false),
     lang: z.enum(['kr', 'en']).default('kr'),
     translationOf: z.string().optional(),
+    series: z.string().optional(),
   }),
 });
 

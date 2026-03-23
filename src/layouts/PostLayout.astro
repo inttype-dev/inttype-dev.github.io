@@ -30,9 +30,12 @@ interface Props {
   nextPost?: PostRef | null;
   projectSlug?: string | null;
   navMapJson?: string;
+  postBasePath?: string;
+  seriesName?: string;
+  seriesPosts?: { id: string; title: string; isCurrent: boolean; numStr: string }[] | null;
 }
 
-const { title, description, pubDate, tags = [], headings = [], enTitle, enDescription, enTags, hasEnTranslation = false, readingTime, postId, prevPost, nextPost, projectSlug, navMapJson } = Astro.props;
+const { title, description, pubDate, tags = [], headings = [], enTitle, enDescription, enTags, hasEnTranslation = false, readingTime, postId, prevPost, nextPost, projectSlug, navMapJson, postBasePath = '/posts', seriesName, seriesPosts } = Astro.props;
 const backHref = projectSlug ? `/projects/${projectSlug}` : '/posts';
 const dateStrKr = pubDate.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
 const dateStrEn = pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -61,7 +64,7 @@ const blogPostingSchema = {
         <!-- KR 헤더 -->
         <div class={hasEn ? 'lang-kr' : undefined}>
           <h1 style="font-size:1.8rem;font-weight:700;color:var(--fg);line-height:1.35;margin-bottom:0.75rem;">{title}</h1>
-          {description && <p style="font-size:0.95rem;color:var(--muted);line-height:1.6;margin-bottom:1rem;">{description}</p>}
+          {description && <p style="font-size:0.95rem;color:var(--muted);line-height:1.6;margin-bottom:1rem;white-space:pre-line;">{description}</p>}
         </div>
 
         <!-- EN 헤더 (번역본 있을 때만) -->
@@ -69,7 +72,7 @@ const blogPostingSchema = {
           <div class="lang-en">
             <h1 style="font-size:1.8rem;font-weight:700;color:var(--fg);line-height:1.35;margin-bottom:0.75rem;">{enTitle ?? title}</h1>
             {(enDescription ?? description) && (
-              <p style="font-size:0.95rem;color:var(--muted);line-height:1.6;margin-bottom:1rem;">{enDescription ?? description}</p>
+              <p style="font-size:0.95rem;color:var(--muted);line-height:1.6;margin-bottom:1rem;white-space:pre-line;">{enDescription ?? description}</p>
             )}
           </div>
         )}
@@ -102,6 +105,28 @@ const blogPostingSchema = {
         </div>
       )}
 
+      <!-- 시리즈 항목 표기 -->
+      {seriesName && seriesPosts && seriesPosts.length > 1 && (
+        <div class="series-block">
+          <div class="series-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+            <span class="nav-kr"><strong>{seriesName}</strong> 시리즈 ({seriesPosts.length}부작)</span>
+          </div>
+          <ul class="series-list">
+            {seriesPosts.map(sp => (
+              <li class={sp.isCurrent ? 'series-item current' : 'series-item'}>
+                <span class="series-num">{sp.numStr}</span>
+                {sp.isCurrent ? (
+                  <span class="series-link">{sp.title}</span>
+                ) : (
+                  <a href={`${postBasePath}/${sp.id}`} class="series-link">{sp.title}</a>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <!-- 하단 태그 -->
       {tags.length > 0 && (
         <div class="post-tags-bottom">
@@ -126,7 +151,7 @@ const blogPostingSchema = {
         <div class="post-nav-grid" id="post-nav-grid">
           <!-- 이전글 (더 오래된 글) -->
           {prevPost ? (
-            <a href={`/posts/${prevPost.id}`} class="post-nav-card" id="nav-prev">
+            <a href={`${postBasePath}/${prevPost.id}`} class="post-nav-card" id="nav-prev">
               <span class="post-nav-label">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
                 <span class="nav-kr">이전 글</span><span class="nav-en">Previous</span>
@@ -138,7 +163,7 @@ const blogPostingSchema = {
 
           <!-- 다음글 (더 최신 글) -->
           {nextPost ? (
-            <a href={`/posts/${nextPost.id}`} class="post-nav-card post-nav-card--next" id="nav-next">
+            <a href={`${postBasePath}/${nextPost.id}`} class="post-nav-card post-nav-card--next" id="nav-next">
               <span class="post-nav-label post-nav-label--next">
                 <span class="nav-kr">다음 글</span><span class="nav-en">Next</span>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
@@ -288,6 +313,64 @@ const blogPostingSchema = {
   .prose :global(table) { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.9rem; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .prose :global(th), .prose :global(td) { border: 1px solid var(--border); padding: 0.5rem 0.75rem; text-align: left; white-space: nowrap; }
   .prose :global(th) { background: var(--card); font-weight: 600; }
+
+  /* 시리즈 블록 */
+  .series-block {
+    margin: 2.5rem 0;
+    padding: 1.5rem;
+    background: color-mix(in srgb, var(--accent) 3%, var(--card));
+    border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border));
+    border-radius: 12px;
+  }
+  .series-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    color: var(--fg);
+    margin-bottom: 1rem;
+    font-weight: 500;
+  }
+  .series-title svg { color: var(--accent); }
+  .series-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .series-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  .series-item.current .series-link {
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .series-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--accent) 10%, var(--card));
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  .series-link {
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  a.series-link:hover { color: var(--fg); text-decoration: underline; }
 
   /* 하단 태그 */
   .post-tags-bottom {
@@ -494,6 +577,23 @@ const blogPostingSchema = {
 <script>
   // TOC 스크롤 spy
   const links = document.querySelectorAll<HTMLAnchorElement>('.toc-link');
+  // 본문 이미지 fallback
+  document.querySelectorAll<HTMLImageElement>('.prose img').forEach(img => {
+    const setFallback = () => {
+      if (img.src !== window.location.origin + '/images/fallbackImage_mascot.png') {
+        img.src = '/images/fallbackImage_mascot.png';
+        img.alt = '이미지 준비 중';
+        img.style.opacity = '0.5';
+      }
+    };
+    if (img.complete && img.naturalWidth === 0) {
+      setFallback();
+    } else {
+      img.addEventListener('error', setFallback, { once: true });
+    }
+  });
+
+  // TOC 스크롤 spy
   if (links.length > 0) {
     const headingEls = [...links].map(l => document.getElementById(l.dataset.slug!)).filter(Boolean) as HTMLElement[];
 

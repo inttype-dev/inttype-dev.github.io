@@ -11,16 +11,19 @@ export async function getStaticPaths() {
 
 const { project } = Astro.props;
 const { data } = project;
+const projectFolder = project.id;
 
-const relatedPosts = (await getCollection('posts', ({ id, data: d }) => !d.draft && id.startsWith(project.id + '/')))
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+// 관련 글 (posts 컬렉션에서 같은 프로젝트 폴더 글 조회)
+const relatedPosts = (await getCollection('posts', ({ id, data: d }) =>
+  !d.draft && d.lang !== 'en' && id.startsWith(projectFolder + '/')
+)).sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf());
 
 const projectSchema = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
   name: data.name,
   description: data.desc,
-  keywords: data.tags.join(', '),
+  keywords: data.tags?.join(', ') ?? '',
   author: { '@type': 'Person', name: 'inttype', url: 'https://inttype-dev.github.io/about' },
   ...(data.github ? { codeRepository: data.github } : {}),
   ...(data.link ? { url: data.link } : {}),
@@ -28,101 +31,100 @@ const projectSchema = {
 ---
 
 <Layout title={`${data.name} | inttype`} jsonLd={projectSchema}>
-  <Header />
-  <main style="max-width: 1080px; margin: 0 auto; padding: 0 1.5rem;">
+    <Header />
+    <main style="max-width: 1080px; margin: 0 auto; padding: 0 1.5rem;">
 
-    <!-- 프로젝트 헤더 -->
-    <section style="padding: 3.5rem 0 2rem; border-bottom: 1px solid var(--border);">
-      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-        <a href="/projects" style="font-size: 0.85rem; color: var(--muted); text-decoration: none;"><span class="nav-kr">프로젝트</span><span class="nav-en">Projects</span></a>
-        <span style="color: var(--border);">/</span>
-        <span style="font-size: 0.85rem; color: var(--fg);">{data.name}</span>
-      </div>
-      <div class="proj-header-row">
-        <h1 style="font-size: 1.6rem; font-weight: 700; color: var(--fg); line-height: 1.3;">{data.name}</h1>
-        <span class={`status-badge ${data.status === '진행 중' ? 'ongoing' : ''}`}>
-          <span class="nav-kr">{data.status}</span>
-          <span class="nav-en">{data.status === '진행 중' ? 'In Progress' : 'Completed'}</span>
-        </span>
-      </div>
-      <p style="font-size: 0.95rem; color: var(--muted); line-height: 1.7; margin: 0.75rem 0 1.25rem;">{data.desc}</p>
-      <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.25rem;">
-        {data.tags.map(tag => (
-          <span style="font-size: 0.78rem; color: var(--muted); border: 1px solid var(--border); border-radius: 4px; padding: 0.15rem 0.5rem;">{tag}</span>
-        ))}
-      </div>
-      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.6rem;">
-        <span style="font-size: 0.85rem; color: var(--muted);">
-          {formatDate(data.startDate)}{data.endDate ? ` - ${formatDate(data.endDate)}` : ''}
-        </span>
-        <div style="display: flex; align-items: center; gap: 0.6rem;">
-          {data.link && (
-            <a href={data.link} target="_blank" rel="noopener noreferrer" class="link-btn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-              </svg>
-              Link
-            </a>
-          )}
-          {data.github && (
-            <a href={data.github} target="_blank" rel="noopener noreferrer" class="link-btn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-              </svg>
-              GitHub
-            </a>
-          )}
+      <!-- 프로젝트 헤더 -->
+      <section style="padding: 3.5rem 0 2rem; border-bottom: 1px solid var(--border);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+          <a href="/projects" style="font-size: 0.85rem; color: var(--muted); text-decoration: none;"><span class="nav-kr">프로젝트</span><span class="nav-en">Projects</span></a>
+          <span style="color: var(--border);">/</span>
+          <span style="font-size: 0.85rem; color: var(--fg);">{data.name}</span>
         </div>
-      </div>
-    </section>
-
-    <!-- 목록으로 -->
-    <div style="padding: 1.5rem 0 0;">
-      <a href="/projects" class="back-block">
-        <span class="nav-kr">← 프로젝트 목록</span>
-        <span class="nav-en">← All Projects</span>
-      </a>
-    </div>
-
-    <!-- 관련 글 -->
-    <section style="padding: 2.5rem 0;">
-      <h2 style="font-size: 0.95rem; font-weight: 600; color: var(--fg); margin-bottom: 1.25rem;">
-        <span class="nav-kr">관련 글{relatedPosts.length > 0 ? ` (${relatedPosts.length})` : ''}</span>
-        <span class="nav-en">Related Posts{relatedPosts.length > 0 ? ` (${relatedPosts.length})` : ''}</span>
-      </h2>
-      {relatedPosts.length > 0 ? (
-        <ul style="list-style: none; padding: 0; margin: 0;">
-          {relatedPosts.map(post => (
-            <li class="post-item">
-              <div class="post-meta-top">
-                <span class="post-category">{post.data.category}</span>
-                <span class="post-date">
-                  <span class="nav-kr">{post.data.pubDate.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                  <span class="nav-en">{post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                </span>
-              </div>
-              <a href={`/posts/${post.id}`} class="post-link">
-                <h3 class="post-title">{post.data.title}</h3>
-                {post.data.description && <p class="post-desc">{post.data.description}</p>}
-              </a>
-              {post.data.tags.length > 0 && (
-                <div class="post-tags">
-                  {post.data.tags.map(tag => <span class="post-tag">#{tag}</span>)}
-                </div>
-              )}
-            </li>
+        <div class="proj-header-row">
+          <h1 style="font-size: 1.6rem; font-weight: 700; color: var(--fg); line-height: 1.3;">{data.name}</h1>
+          <span class={`status-badge ${data.status === '진행 중' ? 'ongoing' : ''}`}>
+            <span class="nav-kr">{data.status}</span>
+            <span class="nav-en">{data.status === '진행 중' ? 'In Progress' : 'Completed'}</span>
+          </span>
+        </div>
+        <p style="font-size: 0.95rem; color: var(--muted); line-height: 1.7; margin: 0.75rem 0 1.25rem;">{data.desc}</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.25rem;">
+          {data.tags.map(tag => (
+            <span style="font-size: 0.78rem; color: var(--muted); border: 1px solid var(--border); border-radius: 4px; padding: 0.15rem 0.5rem;">{tag}</span>
           ))}
-        </ul>
-      ) : (
-        <p style="font-size: 0.875rem; color: var(--muted);">
-          <span class="nav-kr">아직 관련 글이 없습니다.</span>
-          <span class="nav-en">No related posts yet.</span>
-        </p>
-      )}
-    </section>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.6rem;">
+          <span style="font-size: 0.85rem; color: var(--muted);">
+            {formatDate(data.startDate)}{data.endDate ? ` - ${formatDate(data.endDate)}` : ''}
+          </span>
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            {data.link && (
+              <a href={data.link} target="_blank" rel="noopener noreferrer" class="link-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                </svg>
+                Link
+              </a>
+            )}
+            {data.github && (
+              <a href={data.github} target="_blank" rel="noopener noreferrer" class="link-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                </svg>
+                GitHub
+              </a>
+            )}
+          </div>
+        </div>
+      </section>
 
-  </main>
+      <!-- 목록으로 -->
+      <div style="padding: 1.5rem 0 0;">
+        <a href="/projects" class="back-block">
+          <span class="nav-kr">← 프로젝트 목록</span>
+          <span class="nav-en">← All Projects</span>
+        </a>
+      </div>
+
+      <!-- 관련 글 -->
+      <section style="padding: 2.5rem 0;">
+        <h2 style="font-size: 0.95rem; font-weight: 600; color: var(--fg); margin-bottom: 1.25rem;">
+          <span class="nav-kr">관련 글{relatedPosts.length > 0 ? ` (${relatedPosts.length})` : ''}</span>
+          <span class="nav-en">Related Posts{relatedPosts.length > 0 ? ` (${relatedPosts.length})` : ''}</span>
+        </h2>
+        {relatedPosts.length > 0 ? (
+          <ul style="list-style: none; padding: 0; margin: 0;">
+            {relatedPosts.map(post => (
+              <li class="post-item">
+                <div class="post-meta-top">
+                  <span class="post-date">
+                    <span class="nav-kr">{post.data.pubDate.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                    <span class="nav-en">{post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                  </span>
+                </div>
+                <a href={`/posts/${post.id}`} class="post-link">
+                  <h3 class="post-title">{post.data.title}</h3>
+                  {post.data.description && <p class="post-desc">{post.data.description}</p>}
+                </a>
+                {post.data.tags.length > 0 && (
+                  <div class="post-tags">
+                    {post.data.tags.map(tag => <span class="post-tag">#{tag}</span>)}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p style="font-size: 0.875rem; color: var(--muted);">
+            <span class="nav-kr">아직 관련 글이 없습니다.</span>
+            <span class="nav-en">No related posts yet.</span>
+          </p>
+        )}
+      </section>
+
+    </main>
 </Layout>
 
 <style>
@@ -195,11 +197,6 @@ const projectSchema = {
     align-items: center;
     gap: 0.75rem;
     margin-bottom: 0.4rem;
-  }
-  .post-category {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--accent);
   }
   .post-date {
     font-size: 0.78rem;
