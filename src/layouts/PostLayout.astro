@@ -180,6 +180,25 @@ const blogPostingSchema = {
           <span class="nav-en">{projectSlug ? '← Back to project' : '← All posts'}</span>
         </a>
       </nav>
+
+      <!-- 댓글 (Giscus) -->
+      <div class="giscus-wrap">
+        <script src="https://giscus.app/client.js"
+          data-repo="inttype-dev/inttype-dev.github.io"
+          data-repo-id="R_kgDORrTIzw"
+          data-category="Announcements"
+          data-category-id="DIC_kwDORrTIz84C5jZs"
+          data-mapping="pathname"
+          data-strict="1"
+          data-reactions-enabled="1"
+          data-emit-metadata="0"
+          data-input-position="bottom"
+          data-theme="light"
+          data-lang="ko"
+          crossorigin="anonymous"
+          async>
+        </script>
+      </div>
     </article>
 
     <!-- TOC 사이드바 -->
@@ -306,7 +325,10 @@ const blogPostingSchema = {
     color: var(--muted);
     margin: 1.5rem 0;
   }
-  .prose :global(ul), .prose :global(ol) { padding-left: 1.5rem; margin-bottom: 1.25rem; }
+  .prose :global(ul) { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1.25rem; }
+  .prose :global(ol) { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 1.25rem; }
+  .prose :global(ul ul) { list-style-type: circle; margin-bottom: 0; }
+  .prose :global(ul ul ul) { list-style-type: square; }
   .prose :global(li) { margin-bottom: 0.4rem; }
   .prose :global(img) { max-width: 100%; border-radius: 8px; border: 1px solid var(--border); margin: 1.5rem 0; }
   .prose :global(hr) { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
@@ -476,6 +498,13 @@ const blogPostingSchema = {
     .post-nav-back-block { min-height: 44px; }
   }
 
+  /* Giscus */
+  .giscus-wrap {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
   /* TOC 없을 때 단일 컬럼 */
   @media (max-width: 900px) {
     .post-wrapper { grid-template-columns: 1fr; }
@@ -610,4 +639,30 @@ const blogPostingSchema = {
     headingEls.forEach(el => observer.observe(el));
     window.addEventListener('beforeunload', () => observer.disconnect(), { once: true });
   }
+</script>
+
+<script>
+  // Giscus 테마 동기화
+  function sendGiscusTheme(theme: string) {
+    const iframe = document.querySelector<HTMLIFrameElement>('iframe.giscus-frame');
+    if (!iframe) return;
+    iframe.contentWindow?.postMessage(
+      { giscus: { setConfig: { theme: theme === 'dark' ? 'dark' : 'light' } } },
+      'https://giscus.app'
+    );
+  }
+
+  // giscus 로드 완료 후 현재 테마 적용
+  window.addEventListener('message', (e) => {
+    if (e.origin !== 'https://giscus.app') return;
+    const data = e.data as { giscus?: { discussion?: unknown } };
+    if (data?.giscus?.discussion !== undefined) {
+      sendGiscusTheme(document.documentElement.getAttribute('data-theme') ?? 'light');
+    }
+  });
+
+  // 블로그 테마 변경 감지 → giscus에 전달
+  new MutationObserver(() => {
+    sendGiscusTheme(document.documentElement.getAttribute('data-theme') ?? 'light');
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 </script>
