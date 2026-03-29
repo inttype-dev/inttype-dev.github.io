@@ -6,7 +6,7 @@ import { formatDate } from '@/utils/date';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects', ({ data }) => data.lang !== 'en');
-  return projects.map(p => ({ params: { slug: p.id }, props: { project: p } }));
+  return projects.map(p => ({ params: { slug: p.data.slug ?? p.id }, props: { project: p } }));
 }
 
 const { project } = Astro.props;
@@ -16,7 +16,7 @@ const projectFolder = project.id;
 // 관련 글 (posts 컬렉션에서 같은 프로젝트 폴더 글 조회)
 const relatedPosts = (await getCollection('posts', ({ id, data: d }) =>
   !d.draft && d.lang !== 'en' && id.startsWith(projectFolder + '/')
-)).sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf());
+)).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 const projectSchema = {
   '@context': 'https://schema.org',

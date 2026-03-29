@@ -19,9 +19,9 @@ const enRendered = enPost ? await render(enPost) : null;
 
 // 프로젝트 글 감지: post.id 첫 세그먼트가 프로젝트 ID인지 확인
 const allProjects = await getCollection('projects');
-const projectIds = new Set(allProjects.map(p => p.id));
 const firstSegment = post.id.split('/')[0];
-const projectSlug = projectIds.has(firstSegment) ? firstSegment : null;
+const matchedProject = allProjects.find(p => p.id === firstSegment);
+const projectSlug = matchedProject ? (matchedProject.data.slug ?? matchedProject.id) : null;
 
 type PostRefJSON = { id: string; title: string; dateKr: string; dateEn: string } | null;
 const toRef = (p: (typeof allPosts)[0]) => ({

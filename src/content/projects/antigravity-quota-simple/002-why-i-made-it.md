@@ -1,5 +1,5 @@
 ---
-title: "Antigravity Quota Simple — 직접 만든 이유"
+title: "[Antigravity Quota Simple] 직접 만든 이유"
 description: "기존 Extension의 문제점을 발견하고 다른 방식으로 Quota 모니터링 확장 프로그램을 직접 만든 과정"
 pubDate: 2026-03-14T03:00:00
 tags: ["TypeScript", "VS Code Extension API", "Protobuf", "SQLite"]

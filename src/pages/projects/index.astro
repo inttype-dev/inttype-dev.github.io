@@ -26,7 +26,7 @@ const postsByProject = krProjects.map(project => {
     enProject: enProjectMap[project.id],
     posts: allPostEntries
       .filter(p => !p.data.draft && p.data.lang !== 'en' && p.id.startsWith(folder + '/'))
-      .sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf()),
+      .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()),
   };
 });
 ---
@@ -82,7 +82,7 @@ const postsByProject = krProjects.map(project => {
             <!-- 우측: 버튼들 + 글 수 + chevron -->
             <div class="proj-actions">
               <a
-                href={`/projects/${project.id}`}
+                href={`/projects/${project.data.slug ?? project.id}`}
                 class="github-btn"
                 onclick="event.stopPropagation()"
               >

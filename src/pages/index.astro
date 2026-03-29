@@ -56,7 +56,7 @@ const projects = (await getCollection('projects', ({ data }) => data.lang !== 'e
       <div class="proj-slider" id="proj-slider">
         {projects.map((project, i) => (
           <a
-            href={`/projects/${project.id}`}
+            href={`/projects/${project.data.slug ?? project.id}`}
             style="border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--card);text-decoration:none;display:flex;flex-direction:column;transition:border-color 0.15s,transform 0.15s;"
             class="proj-card"
           >
