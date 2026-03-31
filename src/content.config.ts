@@ -24,6 +24,7 @@ const posts = defineCollection({
     lang: z.enum(['kr', 'en']).default('kr'),
     translationOf: z.string().optional(),
     series: z.string().optional(),
+    image: z.string().optional(),
   }),
 });
 

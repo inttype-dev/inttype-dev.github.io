@@ -33,9 +33,10 @@ interface Props {
   postBasePath?: string;
   seriesName?: string;
   seriesPosts?: { id: string; title: string; isCurrent: boolean; numStr: string }[] | null;
+  image?: string;
 }
 
-const { title, description, pubDate, tags = [], headings = [], enTitle, enDescription, enTags, hasEnTranslation = false, readingTime, postId, prevPost, nextPost, projectSlug, navMapJson, postBasePath = '/posts', seriesName, seriesPosts } = Astro.props;
+const { title, description, pubDate, tags = [], headings = [], enTitle, enDescription, enTags, hasEnTranslation = false, readingTime, postId, prevPost, nextPost, projectSlug, navMapJson, postBasePath = '/posts', seriesName, seriesPosts, image } = Astro.props;
 const backHref = projectSlug ? `/projects/${projectSlug}` : '/posts';
 const dateStrKr = pubDate.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
 const dateStrEn = pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -92,6 +93,13 @@ const blogPostingSchema = {
           </span>
         </div>
       </header>
+
+      <!-- 썸네일 -->
+      {image && (
+        <div class="post-thumbnail">
+          <img src={image} alt={title} loading="eager" decoding="async" />
+        </div>
+      )}
 
       <!-- KR 본문 -->
       <div class={`prose${hasEn ? ' lang-kr' : ''}`}>
@@ -284,12 +292,25 @@ const blogPostingSchema = {
     font-weight: 500;
   }
 
+  /* 썸네일 */
+  .post-thumbnail {
+    margin: 2rem 0 0;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .post-thumbnail img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
   /* Prose */
   .prose {
     font-size: 0.975rem;
     line-height: 1.8;
     color: var(--fg);
-    padding: 2.5rem 0 3rem;
+    padding: 0 0 3rem;
   }
   .prose :global(h1), .prose :global(h2), .prose :global(h3) {
     font-weight: 600;
@@ -330,7 +351,9 @@ const blogPostingSchema = {
   .prose :global(ul ul) { list-style-type: circle; margin-bottom: 0; }
   .prose :global(ul ul ul) { list-style-type: square; }
   .prose :global(li) { margin-bottom: 0.4rem; }
-  .prose :global(img) { max-width: 100%; border-radius: 8px; border: 1px solid var(--border); margin: 1.5rem 0; }
+  .prose :global(img) { display: block; width: 100%; max-width: 560px; border-radius: 8px; border: 1px solid var(--border); margin: 1.5rem auto 0; }
+  .prose :global(figure) { margin: 1.5rem auto; max-width: 560px; }
+  .prose :global(figcaption) { text-align: center; font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem; }
   .prose :global(hr) { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
   .prose :global(table) { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.9rem; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .prose :global(th), .prose :global(td) { border: 1px solid var(--border); padding: 0.5rem 0.75rem; text-align: left; white-space: nowrap; }
@@ -606,6 +629,18 @@ const blogPostingSchema = {
 <script>
   // TOC 스크롤 spy
   const links = document.querySelectorAll<HTMLAnchorElement>('.toc-link');
+  // 이미지 alt 캡션
+  document.querySelectorAll<HTMLImageElement>('.prose img').forEach(img => {
+    if (img.alt && img.alt !== '이미지 준비 중') {
+      const figure = document.createElement('figure');
+      const figcaption = document.createElement('figcaption');
+      figcaption.textContent = img.alt;
+      img.parentNode!.insertBefore(figure, img);
+      figure.appendChild(img);
+      figure.appendChild(figcaption);
+    }
+  });
+
   // 본문 이미지 fallback
   document.querySelectorAll<HTMLImageElement>('.prose img').forEach(img => {
     const setFallback = () => {

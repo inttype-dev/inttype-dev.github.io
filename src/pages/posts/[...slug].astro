@@ -100,6 +100,7 @@ function calcReadingTime(body: string): number {
   enTitle={enPost?.data.title}
   enDescription={enPost?.data.description}
   enTags={enPost?.data.tags}
+  image={post.data.image}
   readingTime={calcReadingTime(post.body ?? '')}
   postId={post.id}
   prevPost={prevPost}
