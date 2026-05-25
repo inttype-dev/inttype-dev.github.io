@@ -1,0 +1,51 @@
+<svg width="720" height="240" viewBox="0 0 720 240" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Order Purchase Automation logo</title>
+  <desc id="desc">발주서, 자동화 흐름, 구매입력 완료를 상징하는 로고</desc>
+  <defs>
+    <linearGradient id="markGradient" x1="67" y1="42" x2="186" y2="177" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1B5560"/>
+      <stop offset="1" stop-color="#2B8A72"/>
+    </linearGradient>
+    <linearGradient id="accentGradient" x1="104" y1="83" x2="173" y2="153" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F7C948"/>
+      <stop offset="1" stop-color="#F59E0B"/>
+    </linearGradient>
+    <filter id="markShadow" x="32" y="28" width="184" height="184" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="12" stdDeviation="13" flood-color="#15343A" flood-opacity="0.2"/>
+    </filter>
+    <style>
+      .word { font-family: Inter, Pretendard, "Noto Sans KR", Arial, sans-serif; font-size: 43px; font-weight: 850; fill: #102A31; letter-spacing: 0; }
+      .sub { font-family: Inter, Pretendard, "Noto Sans KR", Arial, sans-serif; font-size: 18px; font-weight: 650; fill: #60757C; letter-spacing: 0; }
+    </style>
+  </defs>
+
+  <rect width="720" height="240" fill="white"/>
+
+  <g filter="url(#markShadow)">
+    <rect x="58" y="42" width="148" height="148" rx="32" fill="url(#markGradient)"/>
+  </g>
+
+  <g transform="translate(84 69)">
+    <path d="M28 0H72L98 26V100C98 108.837 90.837 116 82 116H28C19.1634 116 12 108.837 12 100V16C12 7.16344 19.1634 0 28 0Z" fill="#F8FAFC"/>
+    <path d="M72 1V23C72 31.2843 78.7157 38 87 38H97" fill="#DCEBE7"/>
+    <path d="M35 43H74" stroke="#1B5560" stroke-width="7" stroke-linecap="round"/>
+    <path d="M35 63H66" stroke="#1B5560" stroke-width="7" stroke-linecap="round"/>
+    <path d="M35 83H58" stroke="#1B5560" stroke-width="7" stroke-linecap="round"/>
+  </g>
+
+  <g transform="translate(115 94)">
+    <circle cx="49" cy="49" r="38" fill="url(#accentGradient)" stroke="#FFFFFF" stroke-width="8"/>
+    <path d="M31 49L44 62L69 36" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <path d="M70 120C37 120 37 82 70 82" stroke="#E5F1ED" stroke-width="12" stroke-linecap="round"/>
+  <path d="M195 120C228 120 228 158 195 158" stroke="#E5F1ED" stroke-width="12" stroke-linecap="round"/>
+  <path d="M64 82L77 70L77 94L64 82Z" fill="#E5F1ED"/>
+  <path d="M201 158L188 170L188 146L201 158Z" fill="#E5F1ED"/>
+
+  <g transform="translate(250 78)">
+    <text class="word" x="0" y="0" dominant-baseline="hanging">Order Purchase</text>
+    <text class="word" x="0" y="48" dominant-baseline="hanging">Automation</text>
+    <text class="sub" x="2" y="113" dominant-baseline="hanging">Mail · Sheets · Ecount workflow</text>
+  </g>
+</svg>

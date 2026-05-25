@@ -1,0 +1,183 @@
+<svg width="1020" height="918" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,BlinkMacSystemFont,Helvetica Neue,sans-serif">
+<rect x="0" y="0" width="1020" height="918" rx="0" fill="#eef2f7"/>
+<rect x="12" y="12" width="996" height="490" rx="12" fill="white" stroke="#bfdbfe" stroke-width="1.5"/>
+<rect x="12" y="12" width="996" height="40" rx="12" fill="#1e3a5f"/>
+<rect x="12" y="38" width="996" height="14" rx="0" fill="#1e3a5f"/>
+<text x="32" y="38" text-anchor="start" fill="#93c5fd" font-size="13" font-weight="700">📦  발주 플로우 (Purchase Order)</text>
+<text x="253" y="64" text-anchor="middle" fill="#3b82f6" font-size="10" font-weight="700">① adpro 파트</text>
+<text x="253" y="76" text-anchor="middle" fill="#6b7280" font-size="8">슬랙 커맨드 → 통합발주서 생성 → Drive 업로드</text>
+<text x="751" y="64" text-anchor="middle" fill="#8b5cf6" font-size="10" font-weight="700">② Claude Cowork 파트</text>
+<text x="751" y="76" text-anchor="middle" fill="#6b7280" font-size="8">GWS CLI로 Drive 읽기 → 회사별 발주서 분리</text>
+<line x1="28" y1="84" x2="992" y2="84" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="20" y="92" width="980" height="100" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+<rect x="28" y="100" width="90" height="84" rx="10" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="73" y="124" text-anchor="middle" font-size="19">💬</text>
+<text x="73" y="143" text-anchor="middle" fill="#1e40af" font-size="11" font-weight="700">Slack</text>
+<text x="73" y="159" text-anchor="middle" fill="#6b7280" font-size="8">/발주요청</text>
+<circle cx="118" cy="100" r="11" fill="#3b82f6"/>
+<text x="118" y="104" text-anchor="middle" fill="white" font-size="9" font-weight="700">1</text>
+<line x1="118" y1="142" x2="310" y2="142" stroke="#3b82f6" stroke-width="2"/>
+<polygon points="310,138 310,146 319,142" fill="#3b82f6"/>
+<text x="218" y="134" text-anchor="middle" fill="#9ca3af" font-size="8">HTTP POST</text>
+<rect x="319" y="100" width="90" height="84" rx="10" fill="#dcfce7" stroke="#86efac" stroke-width="1.5"/>
+<text x="364" y="124" text-anchor="middle" font-size="19">⚙️</text>
+<text x="364" y="143" text-anchor="middle" fill="#15803d" font-size="11" font-weight="700">GAS</text>
+<text x="364" y="159" text-anchor="middle" fill="#6b7280" font-size="8">커맨드·라우팅</text>
+<circle cx="409" cy="100" r="11" fill="#3b82f6"/>
+<text x="409" y="104" text-anchor="middle" fill="white" font-size="9" font-weight="700">2</text>
+<line x1="409" y1="142" x2="601" y2="142" stroke="#3b82f6" stroke-width="2"/>
+<polygon points="601,138 601,146 610,142" fill="#3b82f6"/>
+<text x="509" y="134" text-anchor="middle" fill="#9ca3af" font-size="8">/purchase-order</text>
+<text x="509" y="158" text-anchor="middle" fill="#9ca3af" font-size="8">/generate</text>
+<rect x="610" y="100" width="90" height="84" rx="10" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1.5"/>
+<text x="655" y="124" text-anchor="middle" font-size="19">🖥️</text>
+<text x="655" y="143" text-anchor="middle" fill="#3730a3" font-size="11" font-weight="700">adpro</text>
+<text x="655" y="156" text-anchor="middle" fill="#3730a3" font-size="11" font-weight="700">server</text>
+<text x="655" y="168" text-anchor="middle" fill="#6b7280" font-size="8">카페24 API</text>
+<circle cx="700" cy="100" r="11" fill="#3b82f6"/>
+<text x="700" y="104" text-anchor="middle" fill="white" font-size="9" font-weight="700">3</text>
+<line x1="700" y1="142" x2="893" y2="142" stroke="#3b82f6" stroke-width="2.5"/>
+<polygon points="893,138 893,146 902,142" fill="#3b82f6"/>
+<text x="801" y="134" text-anchor="middle" fill="#9ca3af" font-size="8">업로드</text>
+<text x="801" y="158" text-anchor="middle" fill="#9ca3af" font-size="8">완료 ✓</text>
+<rect x="902" y="100" width="90" height="84" rx="10" fill="#ccfbf1" stroke="#5eead4" stroke-width="1.5"/>
+<text x="947" y="124" text-anchor="middle" font-size="19">📁</text>
+<text x="947" y="143" text-anchor="middle" fill="#115e59" font-size="11" font-weight="700">Google</text>
+<text x="947" y="156" text-anchor="middle" fill="#115e59" font-size="11" font-weight="700">Drive</text>
+<text x="947" y="168" text-anchor="middle" fill="#6b7280" font-size="8">통합발주서 저장</text>
+<circle cx="992" cy="100" r="11" fill="#3b82f6"/>
+<text x="992" y="104" text-anchor="middle" fill="white" font-size="9" font-weight="700">4</text>
+<rect x="901" y="198" width="92" height="18" rx="5" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+<text x="947" y="210" text-anchor="middle" fill="#15803d" font-size="8" font-weight="700">adpro 파트 완료 ✓</text>
+<line x1="640" y1="282" x2="937" y2="187" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="7,3"/>
+<polygon points="938,191 935,182 947,184" fill="#8b5cf6"/>
+<rect x="734" y="219" width="118" height="28" rx="6" fill="white" stroke="#c4b5fd" stroke-width="1.5"/>
+<text x="793" y="231" text-anchor="middle" fill="#7c3aed" font-size="9" font-weight="700">GWS CLI 읽기</text>
+<text x="793" y="244" text-anchor="middle" fill="#9ca3af" font-size="7">통합발주서 + 회사별 양식 시트</text>
+<rect x="530" y="262" width="400" height="106" rx="8" fill="#faf5ff" stroke="#ddd6fe" stroke-width="1"/>
+<rect x="540" y="272" width="100" height="86" rx="10" fill="#f3e8ff" stroke="#d8b4fe" stroke-width="1.5"/>
+<text x="590" y="297" text-anchor="middle" font-size="19">🤖</text>
+<text x="590" y="316" text-anchor="middle" fill="#6b21a8" font-size="11" font-weight="700">Claude</text>
+<text x="590" y="329" text-anchor="middle" fill="#6b21a8" font-size="11" font-weight="700">Cowork</text>
+<text x="590" y="341" text-anchor="middle" fill="#6b7280" font-size="8">order-make 스킬</text>
+<circle cx="640" cy="272" r="11" fill="#8b5cf6"/>
+<text x="640" y="276" text-anchor="middle" fill="white" font-size="9" font-weight="700">5</text>
+<line x1="640" y1="315" x2="811" y2="315" stroke="#8b5cf6" stroke-width="2"/>
+<polygon points="811,311 811,319 820,315" fill="#8b5cf6"/>
+<text x="730" y="307" text-anchor="middle" fill="#9ca3af" font-size="8">회사별 분리</text>
+<text x="730" y="331" text-anchor="middle" fill="#9ca3af" font-size="8">파일 생성·저장</text>
+<rect x="820" y="272" width="100" height="86" rx="10" fill="#ffedd5" stroke="#fdba74" stroke-width="1.5"/>
+<text x="870" y="297" text-anchor="middle" font-size="19">📋</text>
+<text x="870" y="316" text-anchor="middle" fill="#9a3412" font-size="11" font-weight="700">회사별</text>
+<text x="870" y="329" text-anchor="middle" fill="#9a3412" font-size="11" font-weight="700">발주서</text>
+<text x="870" y="341" text-anchor="middle" fill="#6b7280" font-size="8">각 공급사 파일</text>
+<circle cx="920" cy="272" r="11" fill="#8b5cf6"/>
+<text x="920" y="276" text-anchor="middle" fill="white" font-size="9" font-weight="700">6</text>
+<line x1="590" y1="368" x2="590" y2="382" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="3,2"/>
+<rect x="518" y="382" width="144" height="30" rx="6" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.5"/>
+<text x="590" y="393" text-anchor="middle" fill="#7c3aed" font-size="9" font-weight="700">📊 회사별 양식 시트 참조</text>
+<text x="590" y="405" text-anchor="middle" fill="#9ca3af" font-size="8">(Google Drive에서 읽기)</text>
+<rect x="28" y="430" width="236" height="56" rx="8" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+<circle cx="42" cy="445" r="4" fill="#3b82f6"/>
+<text x="52" y="449" text-anchor="start" fill="#374151" font-size="10" font-weight="700">카페24 조회 기준</text>
+<text x="42" y="462" text-anchor="start" fill="#6b7280" font-size="9">오늘 날짜 기준 1개월</text>
+<text x="42" y="475" text-anchor="start" fill="#6b7280" font-size="9">상품 준비중 상태 필터</text>
+<rect x="270" y="430" width="236" height="56" rx="8" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+<circle cx="284" cy="445" r="4" fill="#3b82f6"/>
+<text x="294" y="449" text-anchor="start" fill="#374151" font-size="10" font-weight="700">GAS 역할</text>
+<text x="284" y="462" text-anchor="start" fill="#6b7280" font-size="9">슬랙 인증·파싱</text>
+<text x="284" y="475" text-anchor="start" fill="#6b7280" font-size="9">adpro 서버 API 중계</text>
+<rect x="512" y="430" width="236" height="56" rx="8" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+<circle cx="526" cy="445" r="4" fill="#8b5cf6"/>
+<text x="536" y="449" text-anchor="start" fill="#374151" font-size="10" font-weight="700">order-make 스킬</text>
+<text x="526" y="462" text-anchor="start" fill="#6b7280" font-size="9">GWS CLI로 Drive 파일 읽기</text>
+<text x="526" y="475" text-anchor="start" fill="#6b7280" font-size="9">회사별 양식 기준 분리 생성</text>
+<rect x="754" y="430" width="236" height="56" rx="8" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+<circle cx="768" cy="445" r="4" fill="#8b5cf6"/>
+<text x="778" y="449" text-anchor="start" fill="#374151" font-size="10" font-weight="700">최종 출력</text>
+<text x="768" y="462" text-anchor="start" fill="#6b7280" font-size="9">회사별 발주서 Excel 생성</text>
+<text x="768" y="475" text-anchor="start" fill="#6b7280" font-size="9">Google Drive 각 폴더 저장</text>
+<line x1="510" y1="502" x2="510" y2="516" stroke="#94a3b8" stroke-width="2"/>
+<polygon points="506,516 514,516 510,524" fill="#94a3b8"/>
+<rect x="355" y="521" width="310" height="18" rx="9" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+<text x="510" y="534" text-anchor="middle" fill="#94a3b8" font-size="9">회사별 발주서 생성 완료  →  매입 플로우 시작</text>
+<line x1="510" y1="539" x2="510" y2="548" stroke="#94a3b8" stroke-width="2"/>
+<polygon points="506,541 514,541 510,548" fill="#94a3b8"/>
+<rect x="12" y="548" width="996" height="358" rx="12" fill="white" stroke="#ddd6fe" stroke-width="1.5"/>
+<rect x="12" y="548" width="996" height="40" rx="12" fill="#1a1f2e"/>
+<rect x="12" y="574" width="996" height="14" rx="0" fill="#1a1f2e"/>
+<text x="32" y="574" text-anchor="start" fill="#a78bfa" font-size="13" font-weight="700">📥  매입 플로우 (Purchase)</text>
+<rect x="28" y="598" width="964" height="30" rx="8" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+<text x="510" y="617" text-anchor="middle" fill="#166534" font-size="11" font-weight="600">⏱  GAS 트리거 (10분 폴링)  →  Drive 신규 파일 감지  OR  이메일 제목 키워드 감지 (슈땡마·발주)</text>
+<rect x="28" y="636" width="473" height="24" rx="6" fill="#fff7ed" stroke="#fb923c" stroke-width="1.5" stroke-dasharray="5,3"/>
+<text x="264" y="651" text-anchor="middle" fill="#c2410c" font-size="10" font-weight="600">📁  Drive 파일 감지 (신규 파일 생성 시 즉시 트리거)</text>
+<rect x="506" y="640" width="18" height="16" rx="3" fill="#6b7280"/>
+<text x="515" y="650" text-anchor="middle" fill="white" font-size="7" font-weight="700">OR</text>
+<rect x="532" y="636" width="473" height="24" rx="6" fill="#f5f3ff" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="5,3"/>
+<text x="768" y="651" text-anchor="middle" fill="#6d28d9" font-size="10" font-weight="600">📧  이메일 제목 감지 (키워드: 슈땡마, 발주 포함 시)</text>
+<rect x="28" y="684" width="115" height="88" rx="10" fill="#f3e8ff" stroke="#d8b4fe" stroke-width="1.5"/>
+<text x="85" y="710" text-anchor="middle" font-size="19">🔍</text>
+<text x="85" y="729" text-anchor="middle" fill="#6b21a8" font-size="11" font-weight="700">파일·메일</text>
+<text x="85" y="742" text-anchor="middle" fill="#6b21a8" font-size="11" font-weight="700">감지</text>
+<text x="85" y="754" text-anchor="middle" fill="#6b7280" font-size="8">GAS 10분 폴링</text>
+<circle cx="143" cy="684" r="11" fill="#8b5cf6"/>
+<text x="143" y="688" text-anchor="middle" fill="white" font-size="9" font-weight="700">1</text>
+<line x1="142" y1="728" x2="302" y2="728" stroke="#8b5cf6" stroke-width="2"/>
+<polygon points="302,724 302,732 311,728" fill="#8b5cf6"/>
+<text x="226" y="720" text-anchor="middle" fill="#9ca3af" font-size="8">감지 전달</text>
+<rect x="311" y="684" width="115" height="88" rx="10" fill="#e0f2fe" stroke="#7dd3fc" stroke-width="1.5"/>
+<text x="368" y="710" text-anchor="middle" font-size="19">🧠</text>
+<text x="368" y="729" text-anchor="middle" fill="#075985" font-size="11" font-weight="700">LLM</text>
+<text x="368" y="742" text-anchor="middle" fill="#075985" font-size="11" font-weight="700">품목 매핑</text>
+<text x="368" y="754" text-anchor="middle" fill="#6b7280" font-size="8">Claude API 활용</text>
+<circle cx="426" cy="684" r="11" fill="#8b5cf6"/>
+<text x="426" y="688" text-anchor="middle" fill="white" font-size="9" font-weight="700">2</text>
+<line x1="425" y1="728" x2="585" y2="728" stroke="#8b5cf6" stroke-width="2"/>
+<polygon points="585,724 585,732 594,728" fill="#8b5cf6"/>
+<text x="509" y="720" text-anchor="middle" fill="#9ca3af" font-size="8">매핑 결과</text>
+<text x="509" y="744" text-anchor="middle" fill="#9ca3af" font-size="8">→ 시트 기록</text>
+<rect x="594" y="684" width="115" height="88" rx="10" fill="#ccfbf1" stroke="#5eead4" stroke-width="1.5"/>
+<text x="651" y="710" text-anchor="middle" font-size="19">📋</text>
+<text x="651" y="729" text-anchor="middle" fill="#115e59" font-size="11" font-weight="700">등록용</text>
+<text x="651" y="742" text-anchor="middle" fill="#115e59" font-size="11" font-weight="700">Excel 시트</text>
+<text x="651" y="754" text-anchor="middle" fill="#6b7280" font-size="8">이카운트 등록 양식</text>
+<circle cx="709" cy="684" r="11" fill="#8b5cf6"/>
+<text x="709" y="688" text-anchor="middle" fill="white" font-size="9" font-weight="700">3</text>
+<line x1="708" y1="728" x2="868" y2="728" stroke="#6d28d9" stroke-width="2.5"/>
+<polygon points="868,723 868,733 877,728" fill="#6d28d9"/>
+<rect x="730" y="711" width="124" height="16" rx="4" fill="#ede9fe" stroke="#a78bfa" stroke-width="1"/>
+<text x="792" y="722" text-anchor="middle" fill="#6d28d9" font-size="8" font-weight="700">직접 API 호출</text>
+<text x="792" y="744" text-anchor="middle" fill="#9ca3af" font-size="7">(시트 → Push)</text>
+<rect x="877" y="684" width="115" height="88" rx="10" fill="#ffe4e6" stroke="#fda4af" stroke-width="1.5"/>
+<text x="934" y="710" text-anchor="middle" font-size="19">🏢</text>
+<text x="934" y="729" text-anchor="middle" fill="#9f1239" font-size="11" font-weight="700">이카운트</text>
+<text x="934" y="742" text-anchor="middle" fill="#9f1239" font-size="11" font-weight="700">API</text>
+<text x="934" y="754" text-anchor="middle" fill="#6b7280" font-size="8">매입 자동 등록</text>
+<circle cx="992" cy="684" r="11" fill="#8b5cf6"/>
+<text x="992" y="688" text-anchor="middle" fill="white" font-size="9" font-weight="700">4</text>
+<line x1="368" y1="772" x2="368" y2="782" stroke="#0ea5e9" stroke-width="1.5" stroke-dasharray="4,2"/>
+<rect x="293" y="782" width="150" height="38" rx="8" fill="#f0f9ff" stroke="#7dd3fc" stroke-width="1.5"/>
+<text x="368" y="795" text-anchor="middle" fill="#0369a1" font-size="9" font-weight="700">📊 이카운트 품목 DB</text>
+<text x="368" y="809" text-anchor="middle" fill="#6b7280" font-size="8">Excel 시트 (품목 마스터)</text>
+<text x="449" y="802" text-anchor="start" fill="#0ea5e9" font-size="8" font-weight="600">↔ 참조</text>
+<rect x="28" y="834" width="236" height="56" rx="8" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+<circle cx="42" cy="849" r="4" fill="#8b5cf6"/>
+<text x="52" y="853" text-anchor="start" fill="#374151" font-size="10" font-weight="700">GAS 10분 폴링</text>
+<text x="42" y="866" text-anchor="start" fill="#6b7280" font-size="9">Drive + 이메일 동시 감지</text>
+<text x="42" y="879" text-anchor="start" fill="#6b7280" font-size="9">조건 충족 시 즉시 실행</text>
+<rect x="270" y="834" width="236" height="56" rx="8" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+<circle cx="284" cy="849" r="4" fill="#8b5cf6"/>
+<text x="294" y="853" text-anchor="start" fill="#374151" font-size="10" font-weight="700">LLM 매핑</text>
+<text x="284" y="866" text-anchor="start" fill="#6b7280" font-size="9">발주 품목명 →</text>
+<text x="284" y="879" text-anchor="start" fill="#6b7280" font-size="9">이카운트 Excel DB 코드 매핑</text>
+<rect x="512" y="834" width="236" height="56" rx="8" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+<circle cx="526" cy="849" r="4" fill="#8b5cf6"/>
+<text x="536" y="853" text-anchor="start" fill="#374151" font-size="10" font-weight="700">등록용 시트</text>
+<text x="526" y="866" text-anchor="start" fill="#6b7280" font-size="9">이카운트 등록 표준 양식</text>
+<text x="526" y="879" text-anchor="start" fill="#6b7280" font-size="9">매핑 완료 데이터 자동 기록</text>
+<rect x="754" y="834" width="236" height="56" rx="8" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+<circle cx="768" cy="849" r="4" fill="#8b5cf6"/>
+<text x="778" y="853" text-anchor="start" fill="#374151" font-size="10" font-weight="700">이카운트 등록</text>
+<text x="768" y="866" text-anchor="start" fill="#6b7280" font-size="9">시트에서 직접 API Push</text>
+<text x="768" y="879" text-anchor="start" fill="#6b7280" font-size="9">매입 등록 자동 완료</text>
+</svg>
