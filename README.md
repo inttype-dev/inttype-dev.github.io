@@ -88,3 +88,14 @@ draft: false
 ## 배포
 
 `main` 브랜치에 push하면 GitHub Actions를 통해 GitHub Pages에 자동 배포됩니다.
+
+## 코드 리뷰와 보안 검토
+
+이 블로그의 콘텐츠 게시, URL·번역 연결, 검색과 GitHub Pages 배포를 기준으로
+Codex 코드 리뷰와 보안 취약점 검토 지침을 관리합니다.
+
+| 문서 | 내용 |
+| --- | --- |
+| [AGENTS.md](AGENTS.md) | Codex가 따를 콘텐츠 규약, 코드 리뷰 기준과 검증 명령 |
+| [SECURITY.md](SECURITY.md) | 검색·JSON 삽입의 XSS, 외부 서비스, 의존성과 배포 권한 위협 모델 |
+| [코드 리뷰 안내](docs/codex-review.md) | 변경 유형별 확인 파일, 유지할 동작, 검증 방법과 Codex 연결 |
